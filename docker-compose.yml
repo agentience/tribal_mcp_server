@@ -1,0 +1,39 @@
+services:
+  mcp-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      - PERSIST_DIRECTORY=/data/chroma_db
+      - PORT=8000
+      - REQUIRE_AUTH=${REQUIRE_AUTH:-false}
+      - API_KEY=${API_KEY:-dev-api-key}
+      - SECRET_KEY=${SECRET_KEY:-insecure-dev-key-change-in-production}
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    command: mcp-api --host 0.0.0.0 --port 8000 --auto-port
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    ports:
+      - "${MCP_PORT:-5000}:5000"
+    environment:
+      - PERSIST_DIRECTORY=/data/chroma_db
+      - PORT=5000
+      - MCP_PORT=5000
+      - MCP_HOST=0.0.0.0
+      - MCP_API_URL=http://mcp-api:8000
+      - API_KEY=${API_KEY:-dev-api-key}
+      - REQUIRE_AUTH=${REQUIRE_AUTH:-false}
+      - SECRET_KEY=${SECRET_KEY:-insecure-dev-key-change-in-production}
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    depends_on:
+      - mcp-api
+    command: mcp-server --host 0.0.0.0 --port 5000 --auto-port

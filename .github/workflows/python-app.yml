@@ -1,0 +1,76 @@
+name: Python application
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.7.1
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        
+    - name: Install dependencies
+      run: |
+        poetry install
+        
+    - name: Lint with ruff
+      run: |
+        poetry run ruff check .
+        
+    - name: Format check with black
+      run: |
+        poetry run black --check .
+        
+    - name: Type check with mypy
+      run: |
+        poetry run mypy .
+        
+    - name: Test with pytest
+      run: |
+        poetry run pytest
+        
+  build-and-publish:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.7.1
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        
+    - name: Build package
+      run: |
+        poetry build
+        
+    - name: Publish to GitHub Packages
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        poetry config repositories.github https://github.com/yourusername/learned_knowledge_mcp
+        poetry publish -r github -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}

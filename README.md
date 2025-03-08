@@ -1,6 +1,6 @@
-# Learned Knowledge MCP
+# Tribal - Knowledge tracking tools for Claude and other LLMs
 
-A Model Context Protocol (MCP) server for storing and retrieving error information from Claude Code sessions.
+Tribal is a knowledge tracking tool that helps your LLM assistants like Claude remember and learn from programming errors and solutions. It provides a simple CLI for running an MCP (Model Context Protocol) server that stores and retrieves error information.
 
 ## Features
 
@@ -13,33 +13,68 @@ A Model Context Protocol (MCP) server for storing and retrieving error informati
 
 ## Installation
 
-### Prerequisites
+### Using uv (Recommended)
 
-- Python 3.12 or higher
-- pip (Python package manager)
+If you have uv installed (https://github.com/astral-sh/uv), you can use it to install Tribal as a tool:
 
-### Setup
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/learned_knowledge_mcp.git
-cd learned_knowledge_mcp
+# Install as a global tool (recommended)
+uv tool install tribal
+
+# Or install in development mode
+cd /path/to/tribal
+uv tool install -e .
 ```
 
-2. Install Poetry if you don't have it already:
+### Using pip
+
+Alternatively, you can use pip:
+
 ```bash
-curl -sSL https://install.python-poetry.org | python3 -
+# Install with pip
+pip install tribal
+
+# Or install in development mode
+cd /path/to/tribal
+pip install -e .
 ```
 
-3. Install dependencies:
+### Integration with Claude
+
 ```bash
-poetry install
+# Add to Claude
+claude mcp add knowledge --launch "tribal"
+
+# Test the connection
+claude mcp test knowledge
 ```
 
-4. Activate the virtual environment:
-```bash
-poetry shell
-```
+### Developer Installation
+
+If you want to contribute or modify the code:
+
+1. Prerequisites:
+   - Python 3.12 or higher
+   - uv package manager
+
+2. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/learned_knowledge_mcp.git
+   cd learned_knowledge_mcp
+   ```
+
+3. Install uv if you don't have it already:
+   ```bash
+   curl -fsSL https://install.uv.tools | sh
+   ```
+
+4. Create a virtual environment and install dependencies:
+   ```bash
+   uv venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   uv pip install -r requirements.txt -r requirements-dev.txt
+   uv pip install -e .
+   ```
 
 ## Usage
 
@@ -47,28 +82,46 @@ poetry shell
 
 There are several ways to run the server:
 
-#### Using Poetry
+#### Using the tribal command
 
-Start the FastAPI server:
+The simplest way to run the server:
 
 ```bash
-poetry run mcp-api
+# Run the server (default)
+tribal
+
+# Get help
+tribal help
+
+# Show version
+tribal version
+
+# Run with specific options
+tribal server --port 5000 --auto-port
 ```
 
-Start the MCP server (for Claude integration):
+#### Using Python modules
+
+You can also run the server using Python modules:
 
 ```bash
-poetry run mcp-server
+# Run the Tribal server
+python -m learned_knowledge_mcp.mcp_app
+
+# Run the FastAPI backend server 
+python -m learned_knowledge_mcp.app
 ```
 
-#### Using Python module
+#### Using legacy entry points
+
+For backward compatibility, you can use the legacy entry points:
 
 ```bash
-# FastAPI server
-poetry run python -m learned_knowledge_mcp.app
+# Legacy MCP server
+mcp-server
 
-# MCP server
-poetry run python -m learned_knowledge_mcp.mcp_app
+# Legacy FastAPI server
+mcp-api
 ```
 
 #### Command-line Options
@@ -76,22 +129,22 @@ poetry run python -m learned_knowledge_mcp.mcp_app
 For development mode with auto-reload:
 
 ```bash
-poetry run mcp-api --reload
-poetry run mcp-server --reload
+mcp-api --reload
+mcp-server --reload
 ```
 
 To specify a custom port:
 
 ```bash
-poetry run mcp-api --port 8080
-poetry run mcp-server --port 5000
+mcp-api --port 8080
+mcp-server --port 5000
 ```
 
 To automatically find an available port if the specified port is in use:
 
 ```bash
-poetry run mcp-api --auto-port
-poetry run mcp-server --auto-port
+mcp-api --auto-port
+mcp-server --auto-port
 ```
 
 The FastAPI server will be available at http://localhost:8000 (or your specified port), with API documentation at http://localhost:8000/docs.
@@ -103,10 +156,10 @@ You can set various environment variables to configure the servers:
 
 ```bash
 # For the FastAPI server
-PORT=8080 poetry run mcp-api
+PORT=8080 mcp-api
 
 # For the MCP server
-MCP_PORT=5000 MCP_API_URL=http://localhost:8080 poetry run mcp-server
+MCP_PORT=5000 MCP_API_URL=http://localhost:8080 mcp-server
 ```
 
 ### Environment Variables
@@ -140,22 +193,22 @@ The package includes a command-line client for interacting with the API:
 
 ```bash
 # Add a new error record
-poetry run mcp-client --action add --error-type ImportError --language python --error-message "No module named 'requests'" --solution-description "Install requests" --solution-explanation "You need to install the requests package"
+mcp-client --action add --error-type ImportError --language python --error-message "No module named 'requests'" --solution-description "Install requests" --solution-explanation "You need to install the requests package"
 
 # Get an error by ID
-poetry run mcp-client --action get --id <error-id>
+mcp-client --action get --id <error-id>
 
 # Search for errors
-poetry run mcp-client --action search --error-type ImportError --language python
+mcp-client --action search --error-type ImportError --language python
 
 # Find similar errors
-poetry run mcp-client --action similar --query "ModuleNotFoundError: No module named 'pandas'"
+mcp-client --action similar --query "ModuleNotFoundError: No module named 'pandas'"
 ```
 
 For more options, run:
 
 ```bash
-poetry run mcp-client --help
+mcp-client --help
 ```
 
 ### Integration with Development Sessions
@@ -165,7 +218,7 @@ You can integrate the MCP server with your development workflow to automatically
 1. Start the MCP server using Docker:
 
 ```bash
-poetry run docker-start
+docker-start
 ```
 
 2. Use the API client in your code to record errors:
@@ -262,21 +315,21 @@ def search_error(error_message):
 ### Running Tests
 
 ```bash
-poetry run pytest
+pytest
 ```
 
 For a specific test:
 
 ```bash
-poetry run pytest tests/path_to_test.py::test_name
+pytest tests/path_to_test.py::test_name
 ```
 
 ### Linting and Type Checking
 
 ```bash
-poetry run ruff check .
-poetry run mypy .
-poetry run black .
+ruff check .
+mypy .
+black .
 ```
 
 ### Development Installation
@@ -284,7 +337,8 @@ poetry run black .
 To install the package in development mode with all dependencies:
 
 ```bash
-poetry install
+uv pip install -e .
+uv pip install -r requirements-dev.txt
 ```
 
 To set up pre-commit hooks:
@@ -322,19 +376,21 @@ Using a src layout provides several benefits:
 Add a new dependency:
 
 ```bash
-poetry add <package-name>
+uv pip add <package-name>
+# Then update requirements.txt to include the new package
 ```
 
 Add a development dependency:
 
 ```bash
-poetry add --group dev <package-name>
+uv pip add <package-name>
+# Then update requirements-dev.txt to include the new package
 ```
 
 Update dependencies:
 
 ```bash
-poetry update
+uv pip sync requirements.txt requirements-dev.txt
 ```
 
 ## Deployment
@@ -345,22 +401,22 @@ The project includes Docker support with convenient poetry commands:
 
 ```bash
 # Build and start the containers
-poetry run docker-start
+docker-start
 
 # View logs
-poetry run docker-logs
+docker-logs
 
 # Stop the containers
-poetry run docker-stop
+docker-stop
 
 # Rebuild and restart the containers (after code changes)
-poetry run docker-redeploy
+docker-redeploy
 ```
 
 You can customize the deployment using environment variables:
 
 ```bash
-API_PORT=8080 MCP_PORT=5000 REQUIRE_AUTH=true API_KEY=your-secret-key poetry run docker-start
+API_PORT=8080 MCP_PORT=5000 REQUIRE_AUTH=true API_KEY=your-secret-key docker-start
 ```
 
 Or you can use docker-compose directly:
@@ -390,7 +446,7 @@ There are two ways to connect the MCP server to Claude for Desktop:
      "mcpServers": [
        {
          "name": "knowledge",
-         "launchCommand": "cd /path/to/learned_knowledge_mcp && poetry run mcp-server"
+         "launchCommand": "cd /path/to/learned_knowledge_mcp && python -m learned_knowledge_mcp.mcp_app"
        }
      ]
    }
@@ -403,7 +459,7 @@ There are two ways to connect the MCP server to Claude for Desktop:
 1. Ensure the Docker container is running:
    ```bash
    cd /path/to/learned_knowledge_mcp
-   poetry run docker-start
+   docker-start
    ```
 
 2. Verify the container is running correctly:
@@ -441,7 +497,7 @@ You can also connect the Claude Code CLI to your MCP server:
 claude mcp add knowledge http://localhost:5000
 
 # For directly launched server
-claude mcp add knowledge --launch "cd /path/to/learned_knowledge_mcp && poetry run mcp-server"
+claude mcp add knowledge --launch "cd /path/to/learned_knowledge_mcp && python -m learned_knowledge_mcp.mcp_app"
 ```
 
 To test the connection:

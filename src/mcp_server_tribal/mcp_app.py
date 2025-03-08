@@ -1,14 +1,15 @@
-"""Main application module for the MCP server using FastMCP."""
+"""Main application module for Tribal - Knowledge tracking tools for Claude and other LLMs."""
 
 import argparse
 import json
 import logging
 import os
+import sys
 from typing import Dict, List, Optional
 from uuid import UUID
 
 import uvicorn
-from fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 
 from .models.error_record import ErrorQuery, ErrorRecord
 from .services.chroma_storage import ChromaStorage
@@ -23,8 +24,8 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastMCP instance
 mcp = FastMCP(
-    title="Learned Knowledge MCP",
-    description="Model Context Protocol server for storing and retrieving error information",
+    title="Tribal",
+    description="Knowledge tracking tools for Claude and other LLMs",
     version="0.1.0",
 )
 
@@ -217,40 +218,13 @@ async def get_api_status() -> Dict:
     """
     return {
         "status": "ok",
-        "name": "Learned Knowledge MCP",
+        "name": "Tribal",
         "version": "0.1.0",
     }
 
 
-@mcp.handle_execution
-async def handle_execution(tool_name: str, params: Dict) -> Dict:
-    """
-    Handle tool execution.
-    
-    Args:
-        tool_name: Name of the tool to execute
-        params: Tool parameters
-        
-    Returns:
-        Tool execution result
-    """
-    logger.info(f"Executing tool: {tool_name} with params: {json.dumps(params)}")
-    
-    if tool_name == "track_error":
-        return await track_error(**params)
-    elif tool_name == "find_similar_errors":
-        return await find_similar_errors(**params)
-    elif tool_name == "search_errors":
-        return await search_errors(**params)
-    elif tool_name == "get_error_by_id":
-        return await get_error_by_id(**params)
-    elif tool_name == "delete_error":
-        return await delete_error(**params)
-    elif tool_name == "get_api_status":
-        return await get_api_status()
-    else:
-        logger.error(f"Unknown tool: {tool_name}")
-        raise ValueError(f"Unknown tool: {tool_name}")
+# FastMCP 1.3.0 doesn't need an explicit handle_execution
+# The handle_execution functionality is now built in to FastMCP
 
 
 def is_port_available(host, port):
@@ -272,60 +246,99 @@ def find_available_port(host, start_port, max_attempts=100):
     raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
 
 
-def parse_args():
+def parse_args(args=None):
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Run the MCP server")
-    parser.add_argument(
+    parser = argparse.ArgumentParser(
+        description="Tribal - Knowledge tracking tools for Claude and other LLMs"
+    )
+    
+    # Create subparsers for different commands
+    subparsers = parser.add_subparsers(dest="command", help="Command to run")
+    
+    # Server command (default)
+    server_parser = subparsers.add_parser("server", help="Run the knowledge tracking server")
+    server_parser.add_argument(
         "--host",
         type=str,
         default="0.0.0.0",
         help="Host to bind the server to",
     )
-    parser.add_argument(
+    server_parser.add_argument(
         "--port", 
         type=int, 
         default=settings["default_port"], 
         help=f"Port to bind the server to (default: {settings['default_port']})"
     )
-    parser.add_argument(
+    server_parser.add_argument(
         "--reload",
         action="store_true",
         help="Enable auto-reload for development",
     )
-    parser.add_argument(
+    server_parser.add_argument(
         "--auto-port",
         action="store_true",
         help="Automatically find an available port if the specified port is in use",
     )
-    return parser.parse_args()
+    
+    # Version command
+    version_parser = subparsers.add_parser("version", help="Show version information")
+    
+    # Help command
+    help_parser = subparsers.add_parser("help", help="Show help information")
+    
+    # Parse args
+    parsed_args = parser.parse_args(args)
+    
+    # If no command is specified, default to "server"
+    if not parsed_args.command:
+        parsed_args.command = "server"
+        
+    return parsed_args
 
 
-def main():
+def main(sys_args=None):
     """Run the application."""
-    args = parse_args()
-    port = args.port
+    args = parse_args(sys_args)
     
-    # Auto-select port if requested and the specified port is not available
-    if args.auto_port and not is_port_available(args.host, port):
-        original_port = port
-        port = find_available_port(args.host, original_port)
-        logger.info(f"Port {original_port} is in use, using port {port} instead")
-    
-    logger.info(f"Starting MCP server on {args.host}:{port}")
-    
-    try:
-        uvicorn.run(
-            mcp.app,
-            host=args.host,
-            port=port,
-            reload=args.reload,
+    # Handle different commands
+    if args.command == "version":
+        print(f"Tribal: 0.1.0")
+        print(f"Python: {sys.version.split()[0]}")
+        return 0
+        
+    if args.command == "help":
+        parser = argparse.ArgumentParser(
+            description="Tribal - Knowledge tracking tools for Claude and other LLMs"
         )
-    except OSError as e:
-        if "Address already in use" in str(e) and not args.auto_port:
-            logger.error(f"Port {port} is already in use. Use --auto-port to automatically select an available port.")
-            next_port = find_available_port(args.host, port + 1)
-            logger.info(f"You can try using port {next_port} which appears to be available.")
-        raise
+        parser.parse_args(["--help"])
+        return 0
+    
+    # Handle server command (default)
+    if args.command == "server":
+        port = args.port
+        
+        # Auto-select port if requested and the specified port is not available
+        if args.auto_port and not is_port_available(args.host, port):
+            original_port = port
+            port = find_available_port(args.host, original_port)
+            logger.info(f"Port {original_port} is in use, using port {port} instead")
+        
+        logger.info(f"Starting Tribal Knowledge server on {args.host}:{port}")
+        
+        try:
+            # In MCP 1.3.0, we use mcp.run() with 'sse' transport for HTTP connections
+            # The transport parameter determines the protocol used (stdio or sse)
+            mcp.run(transport='stdio')
+            return 0
+        except OSError as e:
+            if "Address already in use" in str(e) and not args.auto_port:
+                logger.error(f"Port {port} is already in use. Use --auto-port to automatically select an available port.")
+                next_port = find_available_port(args.host, port + 1)
+                logger.info(f"You can try using port {next_port} which appears to be available.")
+            raise
+    
+    # Should never reach here if the command is valid
+    return 1
 
 
 if __name__ == "__main__":

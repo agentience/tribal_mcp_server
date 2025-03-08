@@ -1,4 +1,4 @@
-"""MCP server implementation for the learned_knowledge_mcp API."""
+"""MCP server implementation for the Tribal API."""
 
 import json
 import logging
@@ -30,7 +30,7 @@ async def make_api_request(
     params: Optional[Dict] = None
 ) -> dict:
     """
-    Make an API request to the learned_knowledge_mcp API.
+    Make an API request to the Tribal API.
     
     Args:
         method: HTTP method (GET, POST, PUT, DELETE)

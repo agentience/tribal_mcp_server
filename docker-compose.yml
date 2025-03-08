@@ -14,7 +14,7 @@ services:
     volumes:
       - ./data:/data
     restart: unless-stopped
-    command: mcp-api --host 0.0.0.0 --port 8000 --auto-port
+    command: python -m learned_knowledge_mcp.app --host 0.0.0.0 --port 8000 --auto-port
 
   mcp-server:
     build:
@@ -36,4 +36,4 @@ services:
     restart: unless-stopped
     depends_on:
       - mcp-api
-    command: mcp-server --host 0.0.0.0 --port 5000 --auto-port
+    command: python -m learned_knowledge_mcp.mcp_app --host 0.0.0.0 --port 5000 --auto-port

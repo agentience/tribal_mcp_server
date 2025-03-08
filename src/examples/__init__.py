@@ -1,1 +1,1 @@
-"""Examples for the learned_knowledge_mcp package."""
+"""Examples for the Tribal package."""

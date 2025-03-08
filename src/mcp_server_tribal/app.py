@@ -56,8 +56,8 @@ def get_storage() -> StorageInterface:
 
 # Create FastAPI application
 app = FastAPI(
-    title="Learned Knowledge MCP",
-    description="Model Context Protocol server for storing and retrieving error information",
+    title="Tribal",
+    description="Knowledge tracking tools for Claude and other LLMs",
     version="0.1.0",
 )
 
@@ -81,9 +81,9 @@ app.include_router(api_router, prefix="/api/v1")
 async def root() -> Dict:
     """Root endpoint for the API."""
     return {
-        "name": "Learned Knowledge MCP",
+        "name": "Tribal",
         "version": "0.1.0",
-        "description": "Model Context Protocol server for storing and retrieving error information",
+        "description": "Knowledge tracking tools for Claude and other LLMs",
     }
 
 
@@ -166,7 +166,7 @@ def main():
     
     try:
         uvicorn.run(
-            "learned_knowledge_mcp.app:app",
+            "mcp_server_tribal.app:app",
             host=args.host,
             port=port,
             reload=args.reload,

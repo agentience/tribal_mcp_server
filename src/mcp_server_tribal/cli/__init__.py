@@ -1,0 +1,1 @@
+"""CLI commands for mcp_server_tribal"""

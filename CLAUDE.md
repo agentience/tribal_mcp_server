@@ -1,8 +1,10 @@
 # Learned Knowledge MCP - CLAUDE.md
 
 ## Build/Lint/Test Commands
-- Setup: `pip install -e '.[dev]'` - Install with dev dependencies 
-  - **Important**: Use Poetry for dependencies management, not pip!
+- Setup: `uv pip install -e .` - Install package in development mode
+- Install dependencies: `uv pip install -r requirements.txt`
+- Install dev dependencies: `uv pip install -r requirements-dev.txt`
+- Create/update venv: `uv venv`
 - Run server: `python -m learned_knowledge_mcp.app`
 - Lint: `ruff check .`
 - Type check: `mypy .`

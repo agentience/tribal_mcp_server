@@ -9,21 +9,19 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN pip install poetry==1.7.1
+# Install uv
+RUN pip install uv
 
-# Copy Poetry configuration
-COPY pyproject.toml poetry.lock* /app/
-
-# Configure Poetry to not use a virtual environment
-RUN poetry config virtualenvs.create false
+# Copy application requirements
+COPY requirements.txt pyproject.toml setup.py /app/
 
 # Copy application code
 COPY src/ /app/src/
 COPY README.md /app/
 
 # Install dependencies and the package itself
-RUN poetry install --no-interaction --no-ansi --only main
+RUN uv pip install --system -r requirements.txt
+RUN uv pip install --system -e .
 
 # Create volume mount point
 RUN mkdir -p /data
@@ -32,5 +30,4 @@ RUN mkdir -p /data
 EXPOSE 8000
 
 # Run the application
-ENTRYPOINT ["poetry", "run"]
-CMD ["mcp-api", "--host", "0.0.0.0"]
+CMD ["python", "-m", "learned_knowledge_mcp.app", "--host", "0.0.0.0"]

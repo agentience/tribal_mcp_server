@@ -1,41 +1,60 @@
-# Conversation Summary - Thu Mar  6 17:32:21 PST 2025
+# Conversation Fri Mar  7 17:20:37 PST 2025
 
-We integrated the Learned Knowledge MCP (Model Context Protocol) application with Claude for Desktop and the Claude Code CLI. The system provides an error tracking and retrieval mechanism through MCP.
+# Conversation Summary: Tribal CLI Project Restructuring
 
-## What we did:
+## What We Did
 
-1. **Fixed Docker configuration**:
-   - Changed the Docker container name to `mcp_learned_knowledge`
-   - Modified the port mapping to `8081:5000` to avoid conflicts
-   - Updated Docker service configuration for proper naming
+1. **Transitioned from Poetry to uv**:
+   - Replaced Poetry dependency management with uv
+   - Created a modern pyproject.toml structure for uv
+   - Removed unnecessary files like requirements.txt and setup.py
 
-2. **Handled FastMCP compatibility issues**:
-   - Added debug mode in `server.py` to keep the container running even when encountering errors
-   - Used a specific FastMCP version (0.4.1) that works in the Docker environment
-   - Implemented fallback mechanisms to maintain connectivity
+2. **Renamed the Project**:
+   - Changed project name from "learned_knowledge_mcp" to "tribal"
+   - Renamed the main package from "learned_knowledge_mcp" to "mcp_server_tribal"
+   - Updated all internal references and imports throughout the codebase
 
-3. **Updated documentation**:
-   - Enhanced the main project README.md with detailed integration instructions
-   - Added instructions for both Claude for Desktop and Claude Code CLI
-   - Included Docker container verification steps
-   - Removed the redundant mcp_server folder
+3. **Improved CLI Structure**:
+   - Enhanced mcp_app.py to support subcommands (server, version, help)
+   - Made "tribal" the main command entry point
+   - Created proper command handling in the CLI interface
 
-## Key files we worked on:
+4. **Changed Build System**:
+   - Switched from setuptools to hatchling as the build backend
+   - Updated build configuration for the new structure
+   - Set up proper package inclusion with src layout
 
-- `/Users/troymolander/Development/Agentience/learned_knowledge_mcp/README.md` - Main project documentation
-- `/Users/troymolander/Development/Agentience/learned_knowledge_mcp/CLAUDE.md` - Claude-specific notes
-- `/Users/troymolander/Development/Agentience/learned_knowledge_mcp/mcp_server/server.py` (now removed)
-- `/Users/troymolander/Development/Agentience/learned_knowledge_mcp/mcp_server/docker-compose.yml` (now removed)
+5. **Tested the Setup**:
+   - Created a virtual environment with uv
+   - Installed the project in development mode using `uv add --dev --editable .`
+   - Tested the tribal command with `tribal version` and `tribal help`
 
-## Current state:
+## Key Files Modified
 
-- Docker container `mcp_learned_knowledge` is running on port 8081
-- Container stays running in debug mode to maintain connectivity
-- Main README.md has been updated with complete integration instructions
+1. **Configuration Files**:
+   - `/pyproject.toml` - Updated project metadata, dependencies, and build config
+   - `/.python-version` - Created to specify Python version for uv
 
-## What's next:
+2. **Package Files**:
+   - `/src/mcp_server_tribal/__init__.py` - Updated package description and version
+   - `/src/mcp_server_tribal/mcp_app.py` - Enhanced with proper CLI structure
+   - `/src/mcp_server_tribal/app.py` - Updated imports and server description
+   - `/src/mcp_server_tribal/_scripts/__init__.py` - Updated references
+   - `/src/mcp_server_tribal/cli/*` - Updated command references
 
-1. Test the integration with Claude for Desktop using the running Docker container
-2. Test the integration with Claude Code CLI 
-3. Consider further enhancements to the error database functionality
-4. Potentially modify the Docker debug mode to improve functionality while maintaining reliability
+## Current State
+
+- Project is now named "tribal" with main package "mcp_server_tribal"
+- All CLI commands work properly through the "tribal" entry point
+- The project uses uv for dependency management and virtual environments
+- The code structure follows modern Python package layout with src directory
+
+## Next Steps
+
+1. Consider renaming the project directory from "learned_knowledge_mcp" to "tribal"
+2. Set up CI/CD pipelines to build and publish the package
+3. Add more comprehensive testing for the CLI interface
+4. Update documentation to reflect the new structure and commands
+5. Create a proper release process using uv's build capabilities
+
+The project is now well-structured according to modern Python packaging standards, and dependency management is handled by uv instead of Poetry.

@@ -1,4 +1,4 @@
-"""Docker management scripts for learned_knowledge_mcp."""
+"""Docker management scripts for Tribal."""
 
 import os
 import subprocess
@@ -8,7 +8,7 @@ from pathlib import Path
 
 def get_project_root() -> Path:
     """Get the project root directory."""
-    # This assumes the script is in src/learned_knowledge_mcp/_scripts
+    # This assumes the script is in src/mcp_server_tribal/_scripts
     return Path(__file__).parent.parent.parent.parent
 
 

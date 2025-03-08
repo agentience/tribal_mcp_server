@@ -1,11 +1,11 @@
-# Learned Knowledge MCP - CLAUDE.md
+# Tribal - CLAUDE.md
 
 ## Build/Lint/Test Commands
 - Setup: `uv pip install -e .` - Install package in development mode
 - Install dependencies: `uv pip install -r requirements.txt`
 - Install dev dependencies: `uv pip install -r requirements-dev.txt`
 - Create/update venv: `uv venv`
-- Run server: `python -m learned_knowledge_mcp.app`
+- Run server: `tribal` or `python -m mcp_server_tribal.mcp_app`
 - Lint: `ruff check .`
 - Type check: `mypy .`
 - Run tests: `pytest`
@@ -14,24 +14,21 @@
 ## MCP Server Notes
 
 ### Docker Configuration
-- Docker container name: `mcp_learned_knowledge`
-- Docker exposed port: 8081 (mapped to internal port 5000)
-- Docker image name: `mcp_learned_knowledge-mcp_learned_knowledge`
-- Current state: Running in debug mode to ensure availability
+- Docker container name: `tribal`
+- Docker exposed port: 8000 (mapped to internal port 5000)
+- Docker image name: `tribal-mcp`
+- Current state: Running in standard mode
 
 ### FastMCP Version Information
-- **Docker container**: Using FastMCP 0.4.1 in debug mode
-  - Container logs will show "Container still running in debug mode..." every minute
-  - This is normal and helps maintain connectivity for Claude
-  
-- **Development setup**: Can use FastMCP 1.2.0+ with different API
-  - The newer versions support `@mcp.handle_execution` decorator
-  - Server startup is different: `uvicorn.run(mcp.app, host=host, port=port)`
+- **Server**: Using FastMCP 1.3.0+
+  - Modern version with improved API
+  - Supports the `mcp.run(transport='stdio')` interface for stdio MCPs
+  - No need for the `@mcp.handle_execution` decorator anymore
 
 ### Claude Integration
-- Claude for Desktop: Configure via `claude_desktop_config.json`
-- Claude Code CLI: Configure via `claude mcp add knowledge http://localhost:8081`
-- Both work with our debug mode container on port 8081
+- Claude Code CLI: Configure via `claude mcp add tribal tribal`
+- For global installation: `claude mcp add --scope global tribal tribal`
+- Server runs on demand when Claude needs it (stdio protocol)
 
 ## Code Style Guidelines
 - **Framework**: FastAPI for REST API development

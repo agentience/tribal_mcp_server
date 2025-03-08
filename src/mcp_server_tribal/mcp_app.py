@@ -292,6 +292,15 @@ def parse_args(args=None):
     # If no command is specified, default to "server"
     if not parsed_args.command:
         parsed_args.command = "server"
+        # Add default server arguments if they're needed
+        if not hasattr(parsed_args, 'host'):
+            parsed_args.host = "0.0.0.0"
+        if not hasattr(parsed_args, 'port'):
+            parsed_args.port = settings["default_port"]
+        if not hasattr(parsed_args, 'reload'):
+            parsed_args.reload = False
+        if not hasattr(parsed_args, 'auto_port'):
+            parsed_args.auto_port = False
         
     return parsed_args
 

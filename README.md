@@ -1,15 +1,16 @@
-# Tribal - Knowledge tracking tools for Claude and other LLMs
+# MCP Server Tribal - Knowledge Tracking Implementation
 
-Tribal is a knowledge tracking tool that helps your LLM assistants like Claude remember and learn from programming errors and solutions. It provides a simple CLI for running an MCP (Model Context Protocol) server that stores and retrieves error information.
+mcp_server_tribal is a production-ready MCP (Model Context Protocol) server implementation for error knowledge tracking and retrieval. Provides both REST API and native MCP interfaces for integration with LLMs like Claude.
 
 ## Features
 
-- Store and retrieve error information with context and solutions
-- Vector-based similarity search for finding relevant past errors
-- RESTful API with JSON data format
-- Secure authentication using API keys
-- Local storage with ChromaDB
-- Extensible architecture for cloud deployment (AWS)
+- Store and retrieve error records with full context
+- Vector similarity search using ChromaDB
+- REST API (FastAPI) and native MCP interfaces
+- JWT authentication with API keys
+- Local storage (ChromaDB) and AWS integration
+- Docker-compose deployment
+- CLI client integration
 
 ## Installation
 
@@ -19,7 +20,7 @@ If you have uv installed (https://github.com/astral-sh/uv), you can use it to in
 
 ```bash
 # Install as a global tool (recommended)
-uv tool install tribal
+uv tool install mcp_server_tribal
 
 # Or install in development mode
 cd /path/to/tribal
@@ -59,8 +60,8 @@ If you want to contribute or modify the code:
 
 2. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/learned_knowledge_mcp.git
-   cd learned_knowledge_mcp
+   git clone https://github.com/yourorg/mcp_server_tribal.git
+   cd mcp_server_tribal
    ```
 
 3. Install uv if you don't have it already:
@@ -106,10 +107,10 @@ You can also run the server using Python modules:
 
 ```bash
 # Run the Tribal server
-python -m learned_knowledge_mcp.mcp_app
+python -m mcp_server_tribal.mcp_app
 
-# Run the FastAPI backend server 
-python -m learned_knowledge_mcp.app
+# Run the FastAPI backend server
+python -m mcp_server_tribal.app
 ```
 
 #### Using legacy entry points
@@ -179,13 +180,13 @@ MCP_PORT=5000 MCP_API_URL=http://localhost:8080 mcp-server
 
 ### API Endpoints
 
-- `POST /api/v1/errors/`: Create a new error record
-- `GET /api/v1/errors/{error_id}`: Get an error record by ID
-- `PUT /api/v1/errors/{error_id}`: Update an error record
-- `DELETE /api/v1/errors/{error_id}`: Delete an error record
-- `GET /api/v1/errors/`: Search for error records
-- `GET /api/v1/errors/similar/`: Search for similar error records
-- `POST /api/v1/token`: Get an authentication token
+- `POST /errors`: Create new error record
+- `GET /errors/{error_id}`: Get error by ID
+- `PUT /errors/{error_id}`: Update error record
+- `DELETE /errors/{error_id}`: Delete error
+- `GET /errors`: Search errors by criteria
+- `GET /errors/similar`: Find similar errors
+- `POST /token`: Get authentication token
 
 ### Using the Client
 
@@ -229,18 +230,18 @@ from examples.api_client import MCPClient
 # Exception handler that records errors to MCP
 def handle_exception(exc_type, exc_value, exc_traceback):
     import traceback
-    
+
     # Get the error details
     error_type = exc_type.__name__
     error_message = str(exc_value)
     stack_trace = ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-    
+
     # Initialize the client
     client = MCPClient("http://localhost:8000")
-    
+
     # First, search for similar errors
     similar_errors = client.search_similar(f"{error_type}: {error_message}")
-    
+
     if similar_errors:
         print("\n🔍 Found similar errors in the database:")
         for i, error in enumerate(similar_errors[:3], 1):
@@ -251,14 +252,14 @@ def handle_exception(exc_type, exc_value, exc_traceback):
             print(f"Explanation: {error['solution']['explanation']}")
     else:
         print("\n❓ No similar errors found in the database.")
-        
+
         # Ask to save this error for future reference
         save = input("\nWould you like to save this error for future reference? (y/n): ")
         if save.lower() == 'y':
             solution_desc = input("Brief solution description: ")
             solution_explanation = input("Solution explanation: ")
             code_fix = input("Code fix (optional): ")
-            
+
             # Save the error
             client.add_error(
                 error_type=error_type,
@@ -271,7 +272,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
                 task_description="Error encountered during development"
             )
             print("✅ Error saved successfully!")
-    
+
     # Print the original traceback
     traceback.__print_exception(exc_type, exc_value, exc_traceback)
 
@@ -294,7 +295,7 @@ mcp_client = MCPClient("http://localhost:8000")
 def search_error(error_message):
     """Search for solutions to an error."""
     results = mcp_client.search_similar(error_message)
-    
+
     if results:
         print("\n🔍 Found similar errors:")
         for i, error in enumerate(results[:3], 1):
@@ -305,7 +306,7 @@ def search_error(error_message):
             print(f"Explanation: {error['solution']['explanation']}")
     else:
         print("❓ No similar errors found.")
-        
+
 # Usage example:
 # search_error("TypeError: cannot convert the series to int")
 ```
@@ -353,17 +354,21 @@ pre-commit install
 This project follows the modern Python package structure with a `src` layout:
 
 ```
-learned_knowledge_mcp/
+mcp_server_tribal/
 ├── src/
-│   ├── learned_knowledge_mcp/  # Main package
-│   │   ├── api/                # API endpoints
-│   │   ├── models/             # Data models
-│   │   ├── services/           # Business logic
-│   │   └── utils/              # Utilities
-│   └── examples/               # Example code and clients
-├── tests/                      # Test suite
-├── pyproject.toml              # Project metadata and dependencies
-└── README.md                   # Documentation
+│   ├── mcp_server_tribal/      # Core package
+│   │   ├── api/                # FastAPI endpoints
+│   │   ├── cli/                # Command-line interface
+│   │   ├── models/             # Pydantic models
+│   │   ├── services/           # Service layer
+│   │   │   ├── aws/            # AWS integrations
+│   │   │   └── chroma_storage.py # ChromaDB implementation
+│   │   └── utils/              # Utility functions
+│   └── examples/               # Example usage code
+├── tests/                      # pytest test suite
+├── docker-compose.yml          # Docker production setup
+├── pyproject.toml              # Project configuration
+└── README.md                   # Project documentation
 ```
 
 Using a src layout provides several benefits:
@@ -397,20 +402,20 @@ uv pip sync requirements.txt requirements-dev.txt
 
 ### Docker Deployment
 
-The project includes Docker support with convenient poetry commands:
+The project includes standard Docker Compose support:
 
 ```bash
-# Build and start the containers
-docker-start
+# Build and start containers
+docker-compose up -d --build
 
 # View logs
-docker-logs
+docker-compose logs -f
 
-# Stop the containers
-docker-stop
+# Stop containers
+docker-compose down
 
-# Rebuild and restart the containers (after code changes)
-docker-redeploy
+# Restart with clean build
+docker-compose down && docker-compose up -d --build
 ```
 
 You can customize the deployment using environment variables:

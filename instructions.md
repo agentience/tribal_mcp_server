@@ -1,10 +1,10 @@
-# Claude Code Integration with Tribal Knowledge MCP
+# Claude Code Integration with MCP Server Tribal
 
-This document provides instructions for configuring Claude Code to use the Tribal Knowledge MCP for tracking programming errors and solutions.
+This document provides instructions for configuring Claude Code to use the MCP Server Tribal for tracking programming errors and solutions.
 
 ## Overview
 
-Tribal is a knowledge tracking tool that helps Claude remember and learn from programming errors and solutions. It uses the stdio-based Model Context Protocol (MCP) for seamless integration.
+mcp_server_tribal is a production-ready MCP implementation that helps Claude remember and learn from programming errors. It provides both REST API and native MCP interfaces.
 
 ## Installation
 
@@ -12,27 +12,28 @@ Tribal is a knowledge tracking tool that helps Claude remember and learn from pr
 
 - Python 3.12+
 - Claude Code CLI
+- Docker (for production deployment)
 
-### Install Tribal
+### Install MCP Server Tribal
 
 ```bash
 # Install globally with uv
-uv tool install tribal
+uv tool install mcp_server_tribal
 
 # Or install with pip
-pip install tribal
+pip install mcp_server_tribal
 ```
 
 ### Configure Claude Code
 
-Add Tribal as an MCP to Claude Code:
+Add the MCP server to Claude Code:
 
 ```bash
-# Add to current project
-claude mcp add tribal tribal
+# Add with Docker (recommended)
+claude mcp add knowledge --launch "docker-compose up -d"
 
-# Add globally (recommended)
-claude mcp add --scope global tribal tribal
+# Add directly
+claude mcp add knowledge --launch "mcp-server"
 ```
 
 Verify it's configured correctly:
@@ -52,14 +53,15 @@ Claude will automatically:
 
 ### Available MCP Tools
 
-Tribal provides these MCP tools to Claude:
+mcp_server_tribal provides these MCP tools:
 
-1. `track_error` - Track a new error with its context
-2. `find_similar_errors` - Find errors similar to a given query
-3. `search_errors` - Search for errors by type, language, etc.
-4. `get_error_by_id` - Get a specific error by ID
-5. `delete_error` - Remove an error from the database
-6. `get_api_status` - Check if the server is running
+1. `add_error` - Create new error record (POST /errors)
+2. `get_error` - Retrieve error by UUID (GET /errors/{id})
+3. `update_error` - Modify existing error (PUT /errors/{id})
+4. `delete_error` - Remove error record (DELETE /errors/{id})
+5. `search_errors` - Find errors by criteria (GET /errors)
+6. `find_similar` - Semantic similarity search (GET /errors/similar)
+7. `get_token` - Obtain JWT token (POST /token)
 
 ### Example Usage with Claude
 
@@ -91,21 +93,26 @@ You can ask Claude to:
 4. Claude gets back relevant solutions to suggest
 5. New solutions are stored for future reference
 
-## Customizing Tribal
+## Configuration Options
 
-You can customize the Tribal server by setting environment variables:
+Configure the MCP server with these environment variables:
 
-- `PERSIST_DIRECTORY` - Where to store the database (default: ./chroma_db)
-- `API_KEY` - For authentication (default: dev-api-key)
-- `REQUIRE_AUTH` - Whether to require authentication (default: false)
+- `MCP_PORT`: Server port (default: 5000)
+- `MCP_API_URL`: Backend API URL (default: http://localhost:8000)
+- `PERSIST_DIRECTORY`: ChromaDB storage path (default: ./chroma_db)
+- `API_KEY`: Authentication key (required if REQUIRE_AUTH=true)
+- `SECRET_KEY`: JWT signing key
+- `AWS_ACCESS_KEY_ID`: For S3/DynamoDB integration
+- `AWS_SECRET_ACCESS_KEY`: For cloud storage
+- `AWS_S3_BUCKET`: For S3 persistence
 
 ## Troubleshooting
 
 If you encounter issues:
 
-1. Make sure Tribal is installed: `which tribal`
-2. Check it's properly configured: `claude mcp list`
-3. Try running Tribal directly: `tribal version`
+1. Verify MCP Server installation: `which mcp-server`
+2. Check configuration: `claude mcp list`
+3. Test server status: `mcp-server status`
 4. Look for error messages in the Claude output
 5. Check the database directory exists and has proper permissions
 

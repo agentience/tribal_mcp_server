@@ -1,4 +1,13 @@
+# filename: mcp_server_tribal/models/error_record.py
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 """Data models for error records."""
+
 
 from datetime import datetime, UTC
 from typing import List, Optional

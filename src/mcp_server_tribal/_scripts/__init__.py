@@ -1,4 +1,13 @@
+# filename: mcp_server_tribal/_scripts/__init__.py
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 """Docker management scripts for Tribal."""
+
 
 import os
 import subprocess

@@ -1,4 +1,13 @@
+# filename: mcp_server_tribal/mcp_app.py
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 """Main application module for Tribal - Knowledge tracking tools for Claude and other LLMs."""
+
 
 import argparse
 import json

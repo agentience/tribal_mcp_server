@@ -1,4 +1,13 @@
+# filename: mcp_server_tribal/mcp_server.py
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 """MCP server implementation for the Tribal API."""
+
 
 import json
 import logging

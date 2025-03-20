@@ -1,6 +1,6 @@
 # MCP Server Tribal - Knowledge Tracking Implementation
 
-mcp_server_tribal is a production-ready MCP (Model Context Protocol) server implementation for error knowledge tracking and retrieval. Provides both REST API and native MCP interfaces for integration with LLMs like Claude.
+mcp_server_tribal is an MCP (Model Context Protocol) server implementation for error knowledge tracking and retrieval. Provides both REST API and native MCP interfaces for integration with tools like Claude Code and Cline.
 
 ## Features
 

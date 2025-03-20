@@ -1,10 +1,10 @@
-# Claude Code Integration with MCP Server Tribal
+# Claude Code Integration with Tribal
 
-This document provides instructions for configuring Claude Code to use the MCP Server Tribal for tracking programming errors and solutions.
+This document provides instructions for configuring Claude Code to use the Tribal server for tracking programming errors and solutions.
 
 ## Overview
 
-mcp_server_tribal is a production-ready MCP implementation that helps Claude remember and learn from programming errors. It provides both REST API and native MCP interfaces.
+Tribal is a production-ready MCP implementation that helps Claude remember and learn from programming errors. It provides both REST API and native MCP interfaces.
 
 ## Installation
 
@@ -14,14 +14,14 @@ mcp_server_tribal is a production-ready MCP implementation that helps Claude rem
 - Claude Code CLI
 - Docker (for production deployment)
 
-### Install MCP Server Tribal
+### Install Tribal
 
 ```bash
 # Install globally with uv
-uv tool install mcp_server_tribal
+uv tool install tribal
 
 # Or install with pip
-pip install mcp_server_tribal
+pip install tribal
 ```
 
 ### Configure Claude Code
@@ -33,7 +33,7 @@ Add the MCP server to Claude Code:
 claude mcp add knowledge --launch "docker-compose up -d"
 
 # Add directly
-claude mcp add knowledge --launch "mcp-server"
+claude mcp add knowledge --launch "tribal"
 ```
 
 Verify it's configured correctly:
@@ -53,7 +53,7 @@ Claude will automatically:
 
 ### Available MCP Tools
 
-mcp_server_tribal provides these MCP tools:
+Tribal provides these MCP tools:
 
 1. `add_error` - Create new error record (POST /errors)
 2. `get_error` - Retrieve error by UUID (GET /errors/{id})
@@ -110,9 +110,9 @@ Configure the MCP server with these environment variables:
 
 If you encounter issues:
 
-1. Verify MCP Server installation: `which mcp-server`
+1. Verify Tribal installation: `which tribal`
 2. Check configuration: `claude mcp list`
-3. Test server status: `mcp-server status`
+3. Test server status: `tribal status`
 4. Look for error messages in the Claude output
 5. Check the database directory exists and has proper permissions
 

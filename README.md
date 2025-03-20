@@ -1,6 +1,6 @@
 # Tribal - Knowledge Tracking Implementation
 
-Tribal is an MCP (Model Context Protocol) server implementation for error knowledge tracking and retrieval. Provides both REST API and native MCP interfaces for integration with tools like Claude Code and Cline.
+Tribal is an MCP (Model Context Protocol) server implementation for error knowledge tracking and retrieval. It provides both REST API and native MCP interfaces for integration with tools like Claude Code and Cline.
 
 ## Features
 
@@ -12,14 +12,28 @@ Tribal is an MCP (Model Context Protocol) server implementation for error knowle
 - Docker-compose deployment
 - CLI client integration
 
+## Overview
+
+Tribal helps Claude remember and learn from programming errors. When you start a Claude Code session, Tribal is automatically available through MCP without additional imports.
+
+Claude will:
+1. Store programming errors and solutions
+2. Search for similar errors when you encounter problems
+3. Build a knowledge base specific to your coding patterns
+
 ## Installation
+
+### Prerequisites
+
+- Python 3.12+
+- Claude Code CLI (optional)
+- Docker (for production deployment)
+- uv package manager (recommended)
 
 ### Using uv (Recommended)
 
-If you have uv installed (https://github.com/astral-sh/uv), you can use it to install Tribal as a tool:
-
 ```bash
-# Install as a global tool (recommended)
+# Install as a global tool
 uv tool install tribal
 
 # Or install in development mode
@@ -29,47 +43,42 @@ uv tool install -e .
 
 ### Using pip
 
-Alternatively, you can use pip:
-
 ```bash
 # Install with pip
 pip install tribal
 
-# Or install in development mode
+# Or in development mode
 cd /path/to/tribal
 pip install -e .
 ```
 
-### Integration with Claude
+### Configure Claude Code
 
 ```bash
-# Add to Claude
-claude mcp add knowledge --launch "tribal"
+# Add with Docker
+claude mcp add tribal --launch "docker-compose up -d"
 
-# Test the connection
-claude mcp test knowledge
+# Add directly
+claude mcp add tribal --launch "tribal"
+
+# Verify configuration
+claude mcp list
 ```
 
 ### Developer Installation
 
-If you want to contribute or modify the code:
-
-1. Prerequisites:
-   - Python 3.12 or higher
-   - uv package manager
-
-2. Clone the repository:
+1. Clone the repository:
    ```bash
    git clone https://github.com/yourorg/tribal.git
    cd tribal
    ```
 
-3. Install uv if you don't have it already:
+2. Install uv if needed:
    ```bash
    curl -fsSL https://install.uv.tools | sh
    ```
 
-4. Create a virtual environment and install dependencies:
+3. Create a virtual environment and install dependencies:
    ```bash
    uv venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
@@ -79,16 +88,43 @@ If you want to contribute or modify the code:
 
 ## Usage
 
-### Running the Server
+### Available MCP Tools
 
-There are several ways to run the server:
+Tribal provides these MCP tools:
+
+1. `add_error` - Create new error record (POST /errors)
+2. `get_error` - Retrieve error by UUID (GET /errors/{id})
+3. `update_error` - Modify existing error (PUT /errors/{id})
+4. `delete_error` - Remove error record (DELETE /errors/{id})
+5. `search_errors` - Find errors by criteria (GET /errors)
+6. `find_similar` - Semantic similarity search (GET /errors/similar)
+7. `get_token` - Obtain JWT token (POST /token)
+
+### Example Usage with Claude
+
+When Claude encounters an error:
+```
+I'll track this error and look for similar problems in our knowledge base.
+```
+
+When Claude finds a solution:
+```
+I've found a solution! I'll store this in our knowledge base for next time.
+```
+
+### Commands for Claude
+
+You can ask Claude to:
+- "Look for similar errors in our Tribal knowledge base"
+- "Store this solution to our error database"
+- "Check if we've seen this error before"
+
+### Running the Server
 
 #### Using the tribal command
 
-The simplest way to run the server:
-
 ```bash
-# Run the server (default)
+# Run the server
 tribal
 
 # Get help
@@ -97,13 +133,11 @@ tribal help
 # Show version
 tribal version
 
-# Run with specific options
+# Run with options
 tribal server --port 5000 --auto-port
 ```
 
 #### Using Python modules
-
-You can also run the server using Python modules:
 
 ```bash
 # Run the Tribal server
@@ -113,58 +147,50 @@ python -m mcp_server_tribal.mcp_app
 python -m mcp_server_tribal.app
 ```
 
-
-#### Command-line Options
-
-For development mode with auto-reload:
+#### Using legacy entry points
 
 ```bash
+# Legacy MCP server
+mcp-server
+
+# Legacy FastAPI server
+mcp-api
+```
+
+### Command-line Options
+
+```bash
+# Development mode with auto-reload
 mcp-api --reload
 mcp-server --reload
-```
 
-To specify a custom port:
-
-```bash
+# Custom port
 mcp-api --port 8080
 mcp-server --port 5000
-```
 
-To automatically find an available port if the specified port is in use:
-
-```bash
+# Auto port selection
 mcp-api --auto-port
 mcp-server --auto-port
 ```
 
-The FastAPI server will be available at http://localhost:8000 (or your specified port), with API documentation at http://localhost:8000/docs.
-The MCP server will be available at http://localhost:5000 (or your specified port) for Claude and other MCP-compatible LLMs.
-
-#### Environment Variables
-
-You can set various environment variables to configure the servers:
-
-```bash
-# For the FastAPI server
-PORT=8080 mcp-api
-
-# For the MCP server
-MCP_PORT=5000 MCP_API_URL=http://localhost:8080 mcp-server
-```
+The FastAPI server will be available at http://localhost:8000 with API documentation at /docs.
+The MCP server will be available at http://localhost:5000 for Claude and other MCP-compatible LLMs.
 
 ### Environment Variables
 
 #### FastAPI Server
-- `PERSIST_DIRECTORY`: Directory for ChromaDB storage (default: "./chroma_db")
-- `API_KEY`: API key for authentication (default: "dev-api-key")
-- `SECRET_KEY`: Secret key for JWT token generation (default: "insecure-dev-key-change-in-production")
-- `REQUIRE_AUTH`: Whether to require authentication (default: "false")
-- `PORT`: Default port to use for the server (default: 8000)
+- `PERSIST_DIRECTORY`: ChromaDB storage path (default: "./chroma_db")
+- `API_KEY`: Authentication key (default: "dev-api-key")
+- `SECRET_KEY`: JWT signing key (default: "insecure-dev-key-change-in-production")
+- `REQUIRE_AUTH`: Authentication requirement (default: "false")
+- `PORT`: Server port (default: 8000)
 
 #### MCP Server
-- `MCP_API_URL`: URL of the FastAPI server (default: "http://localhost:8000")
-- `MCP_PORT`: Default port for the MCP server (default: 5000)
-- `MCP_HOST`: Host to bind the MCP server to (default: "0.0.0.0")
+- `MCP_API_URL`: FastAPI server URL (default: "http://localhost:8000")
+- `MCP_PORT`: MCP server port (default: 5000)
+- `MCP_HOST`: Host to bind to (default: "0.0.0.0")
+- `API_KEY`: FastAPI access key (default: "dev-api-key")
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`: For AWS integration
 
 ### API Endpoints
 
@@ -177,8 +203,6 @@ MCP_PORT=5000 MCP_API_URL=http://localhost:8080 mcp-server
 - `POST /token`: Get authentication token
 
 ### Using the Client
-
-The package includes a command-line client for interacting with the API:
 
 ```bash
 # Add a new error record
@@ -194,11 +218,13 @@ mcp-client --action search --error-type ImportError --language python
 mcp-client --action similar --query "ModuleNotFoundError: No module named 'pandas'"
 ```
 
-For more options, run:
+### How It Works
 
-```bash
-mcp-client --help
-```
+1. Tribal uses ChromaDB to store error records and solutions
+2. When Claude encounters an error, it sends the error details to Tribal
+3. Tribal vectorizes the error and searches for similar ones
+4. Claude gets back relevant solutions to suggest
+5. New solutions are stored for future reference
 
 ## Development
 
@@ -206,12 +232,7 @@ mcp-client --help
 
 ```bash
 pytest
-```
-
-For a specific test:
-
-```bash
-pytest tests/path_to_test.py::test_name
+pytest tests/path_to_test.py::test_name  # For specific tests
 ```
 
 ### Linting and Type Checking
@@ -222,25 +243,7 @@ mypy .
 black .
 ```
 
-### Development Installation
-
-To install the package in development mode with all dependencies:
-
-```bash
-uv pip install -e .
-uv pip install -r requirements-dev.txt
-```
-
-To set up pre-commit hooks:
-
-```bash
-pip install pre-commit
-pre-commit install
-```
-
 ### Project Structure
-
-This project follows the modern Python package structure with a `src` layout:
 
 ```
 tribal/
@@ -262,31 +265,20 @@ tribal/
 
 ### Managing Dependencies
 
-Add a new dependency:
-
 ```bash
+# Add a dependency
 uv pip add <package-name>
-# Then update requirements.txt to include the new package
-```
 
-Add a development dependency:
-
-```bash
+# Add a development dependency
 uv pip add <package-name>
-# Then update requirements-dev.txt to include the new package
-```
 
-Update dependencies:
-
-```bash
+# Update dependencies
 uv pip sync requirements.txt requirements-dev.txt
 ```
 
 ## Deployment
 
 ### Docker Deployment
-
-The project includes standard Docker Compose support:
 
 ```bash
 # Build and start containers
@@ -298,43 +290,22 @@ docker-compose logs -f
 # Stop containers
 docker-compose down
 
-# Restart with clean build
-docker-compose down && docker-compose up -d --build
-```
-
-You can customize the deployment using environment variables:
-
-```bash
+# With custom environment variables
 API_PORT=8080 MCP_PORT=5000 REQUIRE_AUTH=true API_KEY=your-secret-key docker-start
 ```
 
-Or you can use docker-compose directly:
+### Claude for Desktop Integration
 
-```bash
-# Build and start the containers
-docker-compose up -d
+#### Option 1: Let Claude for Desktop Launch the Server
 
-# View logs
-docker-compose logs -f
-
-# Stop the containers
-docker-compose down
-```
-
-#### Claude for Desktop Integration
-
-There are two ways to connect the MCP server to Claude for Desktop:
-
-##### Option 1: Let Claude for Desktop Launch the Server
-
-1. Open your Claude for Desktop App configuration at `~/Library/Application Support/Claude/claude_desktop_config.json` (create it if it doesn't exist)
+1. Open `~/Library/Application Support/Claude/claude_desktop_config.json`
 
 2. Add the MCP server configuration:
    ```json
    {
      "mcpServers": [
        {
-         "name": "knowledge",
+         "name": "tribal",
          "launchCommand": "cd /path/to/tribal && python -m mcp_server_tribal.mcp_app"
        }
      ]
@@ -343,73 +314,53 @@ There are two ways to connect the MCP server to Claude for Desktop:
 
 3. Restart Claude for Desktop
 
-##### Option 2: Connect to Running Docker Container (Recommended for Production)
+#### Option 2: Connect to Running Docker Container
 
-1. Ensure the Docker container is running:
+1. Start the container:
    ```bash
    cd /path/to/tribal
    docker-start
    ```
 
-2. Verify the container is running correctly:
-   ```bash
-   docker ps | grep mcp
-   ```
-   You should see the container running with port 5000 exposed.
-
-3. Open your Claude for Desktop App configuration at `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-4. Add the MCP server configuration pointing to the Docker container:
+2. Configure Claude for Desktop:
    ```json
    {
      "mcpServers": [
        {
-         "name": "knowledge",
+         "name": "tribal",
          "url": "http://localhost:5000"
        }
      ]
    }
    ```
 
-5. Restart Claude for Desktop
-
-6. In Claude for Desktop, you should now see a notification that it's connected to the "knowledge" MCP server
-
-**Note:** The Docker container is configured to stay running continuously for reliable production use.
-
-##### Claude Code CLI Integration
-
-You can also connect the Claude Code CLI to your MCP server:
+### Claude Code CLI Integration
 
 ```bash
 # For Docker container
-claude mcp add knowledge http://localhost:5000
+claude mcp add tribal http://localhost:5000
 
 # For directly launched server
-claude mcp add knowledge --launch "cd /path/to/tribal && python -m mcp_server_tribal.mcp_app"
+claude mcp add tribal --launch "cd /path/to/tribal && python -m mcp_server_tribal.mcp_app"
+
+# Test the connection
+claude mcp list
+claude mcp test tribal
 ```
 
-To test the connection:
-```bash
-claude mcp list    # Verify your server is listed
-claude mcp test knowledge
-```
+## Troubleshooting
 
-##### Using MCP Tools in Claude
+1. Verify Tribal installation: `which tribal`
+2. Check configuration: `claude mcp list`
+3. Test server status: `tribal status`
+4. Look for error messages in the Claude output
+5. Check the database directory exists and has proper permissions
 
-Once connected, you can use the MCP tools in Claude by asking questions like:
-- "Track this error: ImportError: No module named 'pandas'"
-- "Find similar errors to 'TypeError: cannot convert the series to int'"
-- "Get the error record with ID 123e4567-e89b-12d3-a456-426614174000"
-
-### Cloud Deployment
+## Cloud Deployment
 
 The project includes placeholder implementations for AWS services:
-
 - `S3Storage`: For storing error records in Amazon S3
 - `DynamoDBStorage`: For using DynamoDB as the database
-
-To use these implementations, extend the classes and configure AWS credentials as per AWS SDK requirements.
 
 ## License
 

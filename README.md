@@ -1,4 +1,4 @@
-# Tribal - Knowledge Tracking Implementation
+# Tribal - Knowledge Service
 
 Tribal is an MCP (Model Context Protocol) server implementation for error knowledge tracking and retrieval. It provides both REST API and native MCP interfaces for integration with tools like Claude Code and Cline.
 

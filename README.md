@@ -1,6 +1,6 @@
-# MCP Server Tribal - Knowledge Tracking Implementation
+# Tribal - Knowledge Tracking Implementation
 
-mcp_server_tribal is an MCP (Model Context Protocol) server implementation for error knowledge tracking and retrieval. Provides both REST API and native MCP interfaces for integration with tools like Claude Code and Cline.
+Tribal is an MCP (Model Context Protocol) server implementation for error knowledge tracking and retrieval. Provides both REST API and native MCP interfaces for integration with tools like Claude Code and Cline.
 
 ## Features
 
@@ -20,7 +20,7 @@ If you have uv installed (https://github.com/astral-sh/uv), you can use it to in
 
 ```bash
 # Install as a global tool (recommended)
-uv tool install mcp_server_tribal
+uv tool install tribal
 
 # Or install in development mode
 cd /path/to/tribal
@@ -60,8 +60,8 @@ If you want to contribute or modify the code:
 
 2. Clone the repository:
    ```bash
-   git clone https://github.com/yourorg/mcp_server_tribal.git
-   cd mcp_server_tribal
+   git clone https://github.com/yourorg/tribal.git
+   cd tribal
    ```
 
 3. Install uv if you don't have it already:
@@ -113,17 +113,6 @@ python -m mcp_server_tribal.mcp_app
 python -m mcp_server_tribal.app
 ```
 
-#### Using legacy entry points
-
-For backward compatibility, you can use the legacy entry points:
-
-```bash
-# Legacy MCP server
-mcp-server
-
-# Legacy FastAPI server
-mcp-api
-```
 
 #### Command-line Options
 
@@ -176,7 +165,6 @@ MCP_PORT=5000 MCP_API_URL=http://localhost:8080 mcp-server
 - `MCP_API_URL`: URL of the FastAPI server (default: "http://localhost:8000")
 - `MCP_PORT`: Default port for the MCP server (default: 5000)
 - `MCP_HOST`: Host to bind the MCP server to (default: "0.0.0.0")
-- `API_KEY`: API key for accessing the FastAPI server (default: "dev-api-key")
 
 ### API Endpoints
 
@@ -210,105 +198,6 @@ For more options, run:
 
 ```bash
 mcp-client --help
-```
-
-### Integration with Development Sessions
-
-You can integrate the MCP server with your development workflow to automatically store and retrieve error information:
-
-1. Start the MCP server using Docker:
-
-```bash
-docker-start
-```
-
-2. Use the API client in your code to record errors:
-
-```python
-from examples.api_client import MCPClient
-
-# Exception handler that records errors to MCP
-def handle_exception(exc_type, exc_value, exc_traceback):
-    import traceback
-
-    # Get the error details
-    error_type = exc_type.__name__
-    error_message = str(exc_value)
-    stack_trace = ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-
-    # Initialize the client
-    client = MCPClient("http://localhost:8000")
-
-    # First, search for similar errors
-    similar_errors = client.search_similar(f"{error_type}: {error_message}")
-
-    if similar_errors:
-        print("\n🔍 Found similar errors in the database:")
-        for i, error in enumerate(similar_errors[:3], 1):
-            print(f"\n--- Solution {i} ---")
-            print(f"Description: {error['solution']['description']}")
-            if error['solution'].get('code_fix'):
-                print(f"Code fix: {error['solution']['code_fix']}")
-            print(f"Explanation: {error['solution']['explanation']}")
-    else:
-        print("\n❓ No similar errors found in the database.")
-
-        # Ask to save this error for future reference
-        save = input("\nWould you like to save this error for future reference? (y/n): ")
-        if save.lower() == 'y':
-            solution_desc = input("Brief solution description: ")
-            solution_explanation = input("Solution explanation: ")
-            code_fix = input("Code fix (optional): ")
-
-            # Save the error
-            client.add_error(
-                error_type=error_type,
-                language="python",  # Modify as needed
-                error_message=error_message,
-                solution_description=solution_desc,
-                solution_explanation=solution_explanation,
-                code_fix=code_fix if code_fix else None,
-                code_snippet=None,  # Add code snippet extraction if needed
-                task_description="Error encountered during development"
-            )
-            print("✅ Error saved successfully!")
-
-    # Print the original traceback
-    traceback.__print_exception(exc_type, exc_value, exc_traceback)
-
-# Set the exception handler
-import sys
-sys.excepthook = handle_exception
-```
-
-3. For interactive sessions like Jupyter notebooks, add this code to a cell:
-
-```python
-%load_ext autoreload
-%autoreload 2
-
-from examples.api_client import MCPClient
-
-# Initialize the client
-mcp_client = MCPClient("http://localhost:8000")
-
-def search_error(error_message):
-    """Search for solutions to an error."""
-    results = mcp_client.search_similar(error_message)
-
-    if results:
-        print("\n🔍 Found similar errors:")
-        for i, error in enumerate(results[:3], 1):
-            print(f"\n--- Solution {i} ---")
-            print(f"Description: {error['solution']['description']}")
-            if error['solution'].get('code_fix'):
-                print(f"Code fix: {error['solution']['code_fix']}")
-            print(f"Explanation: {error['solution']['explanation']}")
-    else:
-        print("❓ No similar errors found.")
-
-# Usage example:
-# search_error("TypeError: cannot convert the series to int")
 ```
 
 ## Development
@@ -354,7 +243,7 @@ pre-commit install
 This project follows the modern Python package structure with a `src` layout:
 
 ```
-mcp_server_tribal/
+tribal/
 ├── src/
 │   ├── mcp_server_tribal/      # Core package
 │   │   ├── api/                # FastAPI endpoints
@@ -370,11 +259,6 @@ mcp_server_tribal/
 ├── pyproject.toml              # Project configuration
 └── README.md                   # Project documentation
 ```
-
-Using a src layout provides several benefits:
-- Ensures you're always testing the installed version of your package
-- Prevents import confusion and accidental relative imports
-- Creates a cleaner separation between your package and development files
 
 ### Managing Dependencies
 
@@ -451,7 +335,7 @@ There are two ways to connect the MCP server to Claude for Desktop:
      "mcpServers": [
        {
          "name": "knowledge",
-         "launchCommand": "cd /path/to/learned_knowledge_mcp && python -m learned_knowledge_mcp.mcp_app"
+         "launchCommand": "cd /path/to/tribal && python -m mcp_server_tribal.mcp_app"
        }
      ]
    }
@@ -463,7 +347,7 @@ There are two ways to connect the MCP server to Claude for Desktop:
 
 1. Ensure the Docker container is running:
    ```bash
-   cd /path/to/learned_knowledge_mcp
+   cd /path/to/tribal
    docker-start
    ```
 
@@ -502,7 +386,7 @@ You can also connect the Claude Code CLI to your MCP server:
 claude mcp add knowledge http://localhost:5000
 
 # For directly launched server
-claude mcp add knowledge --launch "cd /path/to/learned_knowledge_mcp && python -m learned_knowledge_mcp.mcp_app"
+claude mcp add knowledge --launch "cd /path/to/tribal && python -m mcp_server_tribal.mcp_app"
 ```
 
 To test the connection:

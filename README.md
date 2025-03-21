@@ -21,70 +21,97 @@ Claude will:
 2. Search for similar errors when you encounter problems
 3. Build a knowledge base specific to your coding patterns
 
-## Installation
+## Packaging and Installing Tribal with uv
 
 ### Prerequisites
 
 - Python 3.12+
-- Claude Code CLI (optional)
-- Docker (for production deployment)
 - uv package manager (recommended)
 
-### Using uv (Recommended)
+### Build and Install Steps
+
+#### Option 1: Direct installation with uv
+
+The simplest approach is to install directly from the current directory:
+
+```bash
+# From the project root directory
+cd /path/to/tribal
+
+# Install using uv
+uv pip install .
+```
+
+#### Option 2: Development Installation
+
+For development work where you want changes to be immediately reflected:
+
+```bash
+# From the project root directory
+cd /path/to/tribal
+
+# Install in development mode
+uv pip install -e .
+```
+
+#### Option 3: Build the package first
+
+If you want to build a distributable package:
+
+```bash
+# Make sure you're in the project root directory
+cd /path/to/tribal
+
+# Install the build package if needed
+uv pip install build
+
+# Build the package
+python -m build
+
+# This creates distribution files in the dist/ directory
+# Now install the wheel file
+uv pip install dist/tribal-0.1.0-py3-none-any.whl
+```
+
+#### Option 4: Using the `uv tool install` command
+
+You can also use the tool installation approach:
 
 ```bash
 # Install as a global tool
-uv tool install tribal
+cd /path/to/tribal
+uv tool install .
 
 # Or install in development mode
-cd /path/to/tribal
 uv tool install -e .
 ```
 
-### Using pip
+### Verification
+
+After installation, verify that the tool is properly installed:
 
 ```bash
-# Install with pip
-pip install tribal
+# Check the installation
+which tribal
 
-# Or in development mode
-cd /path/to/tribal
-pip install -e .
+# Check the version
+tribal version
 ```
 
-### Configure Claude Code
+### Integration with Claude
+
+After installation, you can integrate with Claude:
 
 ```bash
-# Add with Docker
-claude mcp add tribal --launch "docker-compose up -d"
-
-# Add directly
+# Add Tribal to Claude Code
 claude mcp add tribal --launch "tribal"
 
-# Verify configuration
+# Verify the configuration
 claude mcp list
+
+# For Docker container
+claude mcp add tribal http://localhost:5000
 ```
-
-### Developer Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourorg/tribal.git
-   cd tribal
-   ```
-
-2. Install uv if needed:
-   ```bash
-   curl -fsSL https://install.uv.tools | sh
-   ```
-
-3. Create a virtual environment and install dependencies:
-   ```bash
-   uv venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   uv pip install -r requirements.txt -r requirements-dev.txt
-   uv pip install -e .
-   ```
 
 ## Usage
 
@@ -300,13 +327,13 @@ API_PORT=8080 MCP_PORT=5000 REQUIRE_AUTH=true API_KEY=your-secret-key docker-sta
 
 1. Open `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-2. Add the MCP server configuration:
+2. Add the MCP server configuration (assumes Tribal tool is already installed):
    ```json
    {
      "mcpServers": [
        {
          "name": "tribal",
-         "launchCommand": "cd /path/to/tribal && python -m mcp_server_tribal.mcp_app"
+         "launchCommand": "tribal"
        }
      ]
    }
@@ -341,7 +368,7 @@ API_PORT=8080 MCP_PORT=5000 REQUIRE_AUTH=true API_KEY=your-secret-key docker-sta
 claude mcp add tribal http://localhost:5000
 
 # For directly launched server
-claude mcp add tribal --launch "cd /path/to/tribal && python -m mcp_server_tribal.mcp_app"
+claude mcp add tribal --launch "tribal"
 
 # Test the connection
 claude mcp list

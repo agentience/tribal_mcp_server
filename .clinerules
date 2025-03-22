@@ -12,6 +12,14 @@ When working with Jira issues, follow these guidelines:
 
 # Tribal Branching Strategy
 
+## Current Development Workflow
+As we are currently the sole developer on the project, we're using a simplified workflow:
+- Create feature branches from develop as needed
+- Once a feature branch is complete and tested, merge it directly back to develop (no PR required)
+- Run all tests before merging to ensure code quality
+
+This approach will be revised when more developers join the project.
+
 ## Branch Types and Uses
 - main: Production code only
 - develop: Integration branch for features
@@ -19,7 +27,7 @@ When working with Jira issues, follow these guidelines:
 - bugfix/*: Non-critical fixes from develop
 - hotfix/*: Critical fixes from main
 - release/*: Release preparation from develop
-- docs/*: Documentation changes from develop
+- docs/*: Documentation changes from develop. Do not create a new branch for changes to files under the memory-bank directory.
 
 ## Version Bumping Rules
 - feature branches: No version changes
@@ -39,5 +47,5 @@ When working with Jira issues, follow these guidelines:
 1. Always check what branch we're on first
 2. Suggest the appropriate branch type for the changes
 3. Ensure version bumping follows the rules above
-4. Remind about running tests before pushing
+4. Remind about running tests before merging to develop
 5. Help craft clear commit messages with issue IDs

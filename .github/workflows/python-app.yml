@@ -46,7 +46,7 @@ jobs:
 
   build-and-publish:
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: false  # Disabled for now - Re-enable with: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:

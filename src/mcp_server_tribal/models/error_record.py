@@ -15,6 +15,9 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field
 
+# Current schema version - must match the one in chroma_storage.py
+SCHEMA_VERSION = "1.0.0"
+
 
 class ErrorContext(BaseModel):
     """Contextual information about an error."""
@@ -46,6 +49,7 @@ class ErrorRecord(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     metadata: dict = Field(default_factory=dict)
+    schema_version: str = Field(default=SCHEMA_VERSION, description="Schema version for data migration")
 
     model_config = {
         "json_schema_extra": {

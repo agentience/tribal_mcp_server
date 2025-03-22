@@ -30,10 +30,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP instance
+from mcp_server_tribal import __version__
+
 mcp = FastMCP(
     title="Tribal",
     description="Knowledge tracking tools for Claude and other LLMs",
-    version="0.1.0",
+    version=__version__,
 )
 
 
@@ -245,10 +247,12 @@ async def get_api_status() -> Dict:
     Returns:
         API status information
     """
+    from mcp_server_tribal import __version__
+
     return {
         "status": "ok",
         "name": "Tribal",
-        "version": "0.1.0",
+        "version": __version__,
     }
 
 
@@ -345,8 +349,8 @@ def main(sys_args=None):
 
     # Handle different commands
     if args.command == "version":
-        print("Tribal: 0.1.0")
-        print(f"Python: {sys.version.split()[0]}")
+        from mcp_server_tribal.cli.commands import print_version
+        print_version()
         return 0
 
     if args.command == "help":

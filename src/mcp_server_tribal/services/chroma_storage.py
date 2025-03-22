@@ -10,14 +10,27 @@
 
 
 import json
+import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID
 
 import chromadb
 
 from ..models.error_record import ErrorQuery, ErrorRecord
 from .storage_interface import StorageInterface
+from mcp_server_tribal import __version__
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Current schema version - this should be updated when the schema changes
+SCHEMA_VERSION = "1.0.0"
+
+# Schema compatibility matrix - defines which schema versions are compatible with which app versions
+SCHEMA_COMPATIBILITY = {
+    "0.1.0": ["1.0.0"],  # App version 0.1.0 works with schema 1.0.0
+}
 
 
 class ChromaStorage(StorageInterface):
@@ -35,8 +48,15 @@ class ChromaStorage(StorageInterface):
 
         self.client = chromadb.PersistentClient(path=persist_directory)
         self.collection = self.client.get_or_create_collection(
-            name="error_records", metadata={"hnsw:space": "cosine"}
+            name="error_records",
+            metadata={
+                "hnsw:space": "cosine",
+                "schema_version": SCHEMA_VERSION
+            }
         )
+
+        # Validate schema version on startup
+        self._validate_schema_version()
 
     def _error_to_document(self, error: ErrorRecord) -> Dict[str, Any]:
         """Convert ErrorRecord to document format for ChromaDB."""
@@ -193,6 +213,59 @@ class ChromaStorage(StorageInterface):
                 error_records.append(self._document_to_error(document))
 
         return error_records
+
+    def _validate_schema_version(self) -> None:
+        """Validate and potentially migrate the schema version."""
+        try:
+            collection_info = self.client.get_collection(name="error_records")
+            current_version = collection_info.metadata.get("schema_version", "0.0.0")
+
+            if current_version != SCHEMA_VERSION:
+                logger.warning(
+                    f"Schema version mismatch: found {current_version}, expected {SCHEMA_VERSION}"
+                )
+
+                # Check compatibility
+                if self._is_compatible_schema(current_version):
+                    if self._can_migrate(current_version, SCHEMA_VERSION):
+                        self._migrate_schema(current_version, SCHEMA_VERSION)
+                    else:
+                        logger.warning(
+                            f"Cannot automatically migrate from schema version {current_version} "
+                            f"to {SCHEMA_VERSION}, but versions are compatible."
+                        )
+                else:
+                    raise ValueError(
+                        f"Incompatible schema version: {current_version}. "
+                        f"This version of Tribal requires schema version {SCHEMA_VERSION}."
+                    )
+        except Exception as e:
+            # For first-time startup, this is normal
+            logger.info(f"Schema validation startup: {e}")
+
+    def _is_compatible_schema(self, schema_version: str) -> bool:
+        """Check if the schema version is compatible with this application version."""
+        compatible_versions = SCHEMA_COMPATIBILITY.get(__version__, [])
+        return schema_version in compatible_versions
+
+    def _can_migrate(self, from_version: str, to_version: str) -> bool:
+        """Determine if migration is possible between versions."""
+        # Currently only support migration from 0.0.0 to 1.0.0
+        # This is the initial schema setup case
+        if from_version == "0.0.0" and to_version == "1.0.0":
+            return True
+        return False
+
+    def _migrate_schema(self, from_version: str, to_version: str) -> None:
+        """Migrate schema from one version to another."""
+        logger.info(f"Migrating schema from {from_version} to {to_version}")
+
+        if from_version == "0.0.0" and to_version == "1.0.0":
+            # Initial schema setup, just update the metadata
+            self.collection.modify(metadata={"schema_version": to_version})
+            logger.info(f"Schema version updated to {to_version}")
+        else:
+            raise ValueError(f"No migration path from {from_version} to {to_version}")
 
     async def search_similar(
         self, text_query: str, max_results: int = 5

@@ -326,7 +326,26 @@ tribal/
 ├── tests/                      # pytest test suite
 ├── docker-compose.yml          # Docker production setup
 ├── pyproject.toml              # Project configuration
+├── VERSIONING.md               # Versioning strategy documentation
+├── CHANGELOG.md                # Version history
+├── .bumpversion.cfg            # Version bumping configuration
 └── README.md                   # Project documentation
+```
+
+## Versioning
+
+Tribal follows [Semantic Versioning](https://semver.org/). See [VERSIONING.md](VERSIONING.md) for complete details about:
+
+- Version numbering (MAJOR.MINOR.PATCH)
+- Schema versioning for database compatibility
+- Branch naming conventions
+- Release and hotfix procedures
+
+Check the version with:
+
+```bash
+# Display version information
+tribal version
 ```
 
 ### Managing Dependencies

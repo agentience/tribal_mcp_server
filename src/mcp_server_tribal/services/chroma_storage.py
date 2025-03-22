@@ -12,7 +12,7 @@
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 import chromadb
@@ -20,7 +20,6 @@ import chromadb
 from ..models.error_record import ErrorQuery, ErrorRecord
 from .migration import migration_manager
 from .storage_interface import StorageInterface
-from mcp_server_tribal import __version__
 
 # Configure logging
 logger = logging.getLogger(__name__)

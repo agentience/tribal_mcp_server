@@ -40,6 +40,11 @@ jobs:
       run: |
         uv run mypy --ignore-missing-imports src/ || true
 
+    - name: Check version consistency
+      run: |
+        pip install tomli
+        python scripts/check_version_consistency.py
+
     - name: Test with pytest
       run: |
         uv run pytest

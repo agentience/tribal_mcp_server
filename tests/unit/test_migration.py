@@ -9,7 +9,6 @@
 """Tests for the schema migration framework."""
 
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 from mcp_server_tribal.services.migration import MigrationManager

@@ -10,7 +10,7 @@
 
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from mcp_server_tribal import __version__
 

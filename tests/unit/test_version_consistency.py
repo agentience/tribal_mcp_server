@@ -11,9 +11,7 @@
 
 import unittest
 import os
-import sys
-import tempfile
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, MagicMock
 from io import StringIO
 
 # Mock the modules for testing rather than importing directly

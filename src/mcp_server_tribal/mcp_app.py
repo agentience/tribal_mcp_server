@@ -13,11 +13,11 @@ import argparse
 import json
 import logging
 import os
-import sys
 from typing import Dict, List, Optional
 from uuid import UUID
 
 from mcp.server.fastmcp import FastMCP
+from mcp_server_tribal import __version__
 
 from .models.error_record import ErrorQuery, ErrorRecord
 from .services.chroma_storage import ChromaStorage
@@ -30,7 +30,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP instance
-from mcp_server_tribal import __version__
 
 mcp = FastMCP(
     title="Tribal",

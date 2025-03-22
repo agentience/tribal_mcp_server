@@ -23,7 +23,7 @@ import os
 import re
 import sys
 import tomli
-from typing import Dict, List, Tuple, Set
+from typing import List, Tuple
 
 
 def check_init_version() -> Tuple[bool, str]:

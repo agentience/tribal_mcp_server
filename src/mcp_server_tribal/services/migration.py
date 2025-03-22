@@ -1,3 +1,12 @@
+# filename: {filename}
+# description:
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 # filename: mcp_server_tribal/services/migration.py
 #
 # Copyright (c) 2025 Agentience.ai
@@ -32,7 +41,9 @@ class MigrationManager:
             "0.1.0": ["1.0.0"],  # App version 0.1.0 works with schema 1.0.0
         }
 
-    def register_migration(self, from_version: str, to_version: str, migration_fn: MigrationFn) -> None:
+    def register_migration(
+        self, from_version: str, to_version: str, migration_fn: MigrationFn
+    ) -> None:
         """
         Register a migration function between two schema versions.
 
@@ -47,7 +58,9 @@ class MigrationManager:
         self.migrations[from_version][to_version] = migration_fn
         logger.info(f"Registered migration path: {from_version} -> {to_version}")
 
-    def get_migration_path(self, from_version: str, to_version: str) -> Optional[MigrationPath]:
+    def get_migration_path(
+        self, from_version: str, to_version: str
+    ) -> Optional[MigrationPath]:
         """
         Find a migration path between two schema versions.
 
@@ -60,8 +73,13 @@ class MigrationManager:
             None otherwise
         """
         # Direct migration path
-        if from_version in self.migrations and to_version in self.migrations[from_version]:
-            return [(from_version, to_version, self.migrations[from_version][to_version])]
+        if (
+            from_version in self.migrations
+            and to_version in self.migrations[from_version]
+        ):
+            return [
+                (from_version, to_version, self.migrations[from_version][to_version])
+            ]
 
         # BFS to find a migration path
         visited = {from_version}
@@ -81,12 +99,16 @@ class MigrationManager:
 
                 if next_version not in visited:
                     visited.add(next_version)
-                    queue.append((next_version, path + [(current, next_version, migration_fn)]))
+                    queue.append(
+                        (next_version, path + [(current, next_version, migration_fn)])
+                    )
 
         logger.warning(f"No migration path from {from_version} to {to_version}")
         return None
 
-    def execute_migration(self, storage: Any, from_version: str, to_version: str) -> bool:
+    def execute_migration(
+        self, storage: Any, from_version: str, to_version: str
+    ) -> bool:
         """
         Execute migration between two schema versions.
 
@@ -117,7 +139,9 @@ class MigrationManager:
             logger.error(f"Migration failed: {e}")
             return False
 
-    def is_compatible(self, schema_version: str, app_version: Optional[str] = None) -> bool:
+    def is_compatible(
+        self, schema_version: str, app_version: Optional[str] = None
+    ) -> bool:
         """
         Check if a schema version is compatible with an application version.
 
@@ -140,7 +164,9 @@ class MigrationManager:
 
         return result
 
-    def register_compatibility(self, app_version: str, schema_versions: List[str]) -> None:
+    def register_compatibility(
+        self, app_version: str, schema_versions: List[str]
+    ) -> None:
         """
         Register compatible schema versions for an application version.
 
@@ -149,7 +175,9 @@ class MigrationManager:
             schema_versions: List of compatible schema versions
         """
         self.compatibility_matrix[app_version] = schema_versions
-        logger.info(f"Registered compatibility for app version {app_version}: {schema_versions}")
+        logger.info(
+            f"Registered compatibility for app version {app_version}: {schema_versions}"
+        )
 
 
 # Initialize the global migration manager
@@ -157,13 +185,15 @@ migration_manager = MigrationManager()
 
 # Register migrations
 
+
 # Initial schema migration (0.0.0 -> 1.0.0)
 def migrate_initial_to_v1(storage: Any) -> None:
     """Migrate from initial schema (0.0.0) to version 1.0.0."""
     # For ChromaDB this is just updating the metadata
-    if hasattr(storage, 'collection'):
+    if hasattr(storage, "collection"):
         storage.collection.modify(metadata={"schema_version": "1.0.0"})
         logger.info("Updated schema version to 1.0.0")
+
 
 migration_manager.register_migration("0.0.0", "1.0.0", migrate_initial_to_v1)
 

@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+# filename: {filename}
+# description:
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 # filename: scripts/check_version_consistency.py
 #
 # Copyright (c) 2025 Agentience.ai
@@ -61,7 +70,9 @@ def check_pyproject_version() -> Tuple[bool, str]:
 
 def check_error_record_schema_version() -> Tuple[bool, str]:
     """Check the schema version in models/error_record.py."""
-    error_record_path = os.path.join("src", "mcp_server_tribal", "models", "error_record.py")
+    error_record_path = os.path.join(
+        "src", "mcp_server_tribal", "models", "error_record.py"
+    )
     schema_version_pattern = re.compile(r'SCHEMA_VERSION = "([\d\.]+)"')
 
     with open(error_record_path, "r") as f:
@@ -77,7 +88,9 @@ def check_error_record_schema_version() -> Tuple[bool, str]:
 
 def check_chroma_storage_schema_version() -> Tuple[bool, str]:
     """Check the schema version in services/chroma_storage.py."""
-    chroma_storage_path = os.path.join("src", "mcp_server_tribal", "services", "chroma_storage.py")
+    chroma_storage_path = os.path.join(
+        "src", "mcp_server_tribal", "services", "chroma_storage.py"
+    )
     schema_version_pattern = re.compile(r'SCHEMA_VERSION = "([\d\.]+)"')
 
     with open(chroma_storage_path, "r") as f:
@@ -91,15 +104,21 @@ def check_chroma_storage_schema_version() -> Tuple[bool, str]:
     return True, version
 
 
-def check_migration_compatibility_matrix(app_version: str, schema_version: str) -> Tuple[bool, str]:
+def check_migration_compatibility_matrix(
+    app_version: str, schema_version: str
+) -> Tuple[bool, str]:
     """Check the compatibility matrix in services/migration.py."""
-    migration_path = os.path.join("src", "mcp_server_tribal", "services", "migration.py")
+    migration_path = os.path.join(
+        "src", "mcp_server_tribal", "services", "migration.py"
+    )
 
     with open(migration_path, "r") as f:
         content = f.read()
 
     # This is a simplistic approach - in a real implementation, we might use AST parsing
-    compatibility_pattern = re.compile(r'self\.compatibility_matrix: Dict.*?{(.*?)}', re.DOTALL)
+    compatibility_pattern = re.compile(
+        r"self\.compatibility_matrix: Dict.*?{(.*?)}", re.DOTALL
+    )
     match = compatibility_pattern.search(content)
 
     if not match:
@@ -108,7 +127,7 @@ def check_migration_compatibility_matrix(app_version: str, schema_version: str) 
     matrix_str = match.group(1)
 
     # Check if the app version is in the matrix
-    app_version_pattern = re.compile(fr'"{app_version}": \[(.*?)\]')
+    app_version_pattern = re.compile(rf'"{app_version}": \[(.*?)\]')
     app_match = app_version_pattern.search(matrix_str)
 
     if not app_match:
@@ -117,9 +136,15 @@ def check_migration_compatibility_matrix(app_version: str, schema_version: str) 
     # Check if the schema version is listed for the app version
     schema_versions_str = app_match.group(1)
     if f'"{schema_version}"' not in schema_versions_str:
-        return False, f"Schema version {schema_version} not compatible with app version {app_version}"
+        return (
+            False,
+            f"Schema version {schema_version} not compatible with app version {app_version}",
+        )
 
-    return True, f"App version {app_version} is compatible with schema version {schema_version}"
+    return (
+        True,
+        f"App version {app_version} is compatible with schema version {schema_version}",
+    )
 
 
 def check_version_references_in_codebase(app_version: str) -> List[Tuple[bool, str]]:
@@ -140,7 +165,7 @@ def check_version_references_in_codebase(app_version: str) -> List[Tuple[bool, s
                 continue
 
             # Look for version strings in format "x.y.z" that don't match app_version
-            version_pattern = re.compile(r'(\d+\.\d+\.\d+(-[a-zA-Z0-9]+)?)')
+            version_pattern = re.compile(r"(\d+\.\d+\.\d+(-[a-zA-Z0-9]+)?)")
             for match in version_pattern.finditer(content):
                 found_version = match.group(1)
 
@@ -149,14 +174,24 @@ def check_version_references_in_codebase(app_version: str) -> List[Tuple[bool, s
                     continue
 
                 # If we find a version that doesn't match and isn't in a comment
-                line = content[content.rfind('\n', 0, match.start()) + 1:content.find('\n', match.end())]
-                if (found_version != app_version and
-                    not line.strip().startswith('#') and
-                    not line.strip().startswith('"""') and
-                    "SCHEMA_VERSION" not in line and
-                    "schema_version" not in line and
-                    "compatibility_matrix" not in line):
-                    results.append((False, f"Found inconsistent version {found_version} in {file_path}"))
+                line = content[
+                    content.rfind("\n", 0, match.start())
+                    + 1 : content.find("\n", match.end())
+                ]
+                if (
+                    found_version != app_version
+                    and not line.strip().startswith("#")
+                    and not line.strip().startswith('"""')
+                    and "SCHEMA_VERSION" not in line
+                    and "schema_version" not in line
+                    and "compatibility_matrix" not in line
+                ):
+                    results.append(
+                        (
+                            False,
+                            f"Found inconsistent version {found_version} in {file_path}",
+                        )
+                    )
 
     return results
 
@@ -184,7 +219,9 @@ def main() -> int:
 
     # Check versions match
     if init_version != pyproject_version:
-        print(f"ERROR: Version mismatch between __init__.py ({init_version}) and pyproject.toml ({pyproject_version})")
+        print(
+            f"ERROR: Version mismatch between __init__.py ({init_version}) and pyproject.toml ({pyproject_version})"
+        )
         all_consistent = False
 
     # Check schema versions
@@ -204,11 +241,15 @@ def main() -> int:
 
     # Check schema versions match
     if error_record_schema != chroma_schema:
-        print(f"ERROR: Schema version mismatch between error_record.py ({error_record_schema}) and chroma_storage.py ({chroma_schema})")
+        print(
+            f"ERROR: Schema version mismatch between error_record.py ({error_record_schema}) and chroma_storage.py ({chroma_schema})"
+        )
         all_consistent = False
 
     # Check compatibility matrix
-    compat_success, compat_message = check_migration_compatibility_matrix(init_version, error_record_schema)
+    compat_success, compat_message = check_migration_compatibility_matrix(
+        init_version, error_record_schema
+    )
     if not compat_success:
         print(f"ERROR: {compat_message}")
         all_consistent = False

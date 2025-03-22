@@ -1,3 +1,12 @@
+# filename: {filename}
+# description:
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 # filename: mcp_server_tribal/cli/commands.py
 #
 # Copyright (c) 2025 Agentience.ai
@@ -49,7 +58,10 @@ def uvx_main() -> int:
 def print_version() -> None:
     """Print version information for the package and dependencies"""
     from mcp_server_tribal import __version__
-    from mcp_server_tribal.services.chroma_storage import SCHEMA_VERSION, SCHEMA_COMPATIBILITY
+    from mcp_server_tribal.services.chroma_storage import (
+        SCHEMA_VERSION,
+        SCHEMA_COMPATIBILITY,
+    )
 
     print(f"Tribal Version: {__version__}")
     print(f"Database Schema: {SCHEMA_VERSION}")
@@ -62,6 +74,7 @@ def print_version() -> None:
     # Print dependency versions
     try:
         from mcp import __version__ as mcp_version
+
         print(f"MCP Version: {mcp_version}")
     except ImportError:
         print("MCP: Not installed")

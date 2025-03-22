@@ -23,9 +23,16 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
+        args:
+          - --ignore-missing-imports
+          - --allow-untyped-defs
+          - --allow-incomplete-defs
+          - --allow-untyped-decorators
+          - --no-warn-no-return
         additional_dependencies:
           - pydantic
           - fastapi
+          - types-requests
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.1

@@ -1,3 +1,12 @@
+# filename: {filename}
+# description:
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 # filename: mcp_server_tribal/models/error_record.py
 #
 # Copyright (c) 2025 Agentience.ai
@@ -49,7 +58,9 @@ class ErrorRecord(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     metadata: dict = Field(default_factory=dict)
-    schema_version: str = Field(default=SCHEMA_VERSION, description="Schema version for data migration")
+    schema_version: str = Field(
+        default=SCHEMA_VERSION, description="Schema version for data migration"
+    )
 
     model_config = {
         "json_schema_extra": {

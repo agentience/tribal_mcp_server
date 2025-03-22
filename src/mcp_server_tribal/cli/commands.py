@@ -49,17 +49,30 @@ def uvx_main() -> int:
 def print_version() -> None:
     """Print version information for the package and dependencies"""
     from mcp_server_tribal import __version__
+    from mcp_server_tribal.services.chroma_storage import SCHEMA_VERSION, SCHEMA_COMPATIBILITY
 
-    print(f"tribal: {__version__}")
+    print(f"Tribal Version: {__version__}")
+    print(f"Database Schema: {SCHEMA_VERSION}")
+
+    # Show compatible schema versions
+    compatible_versions = SCHEMA_COMPATIBILITY.get(__version__, [])
+    if compatible_versions:
+        print(f"Compatible Schema Versions: {', '.join(compatible_versions)}")
+
+    # Print dependency versions
     try:
         from mcp import __version__ as mcp_version
-
-        print(f"mcp: {mcp_version}")
+        print(f"MCP Version: {mcp_version}")
     except ImportError:
-        print("mcp: Not installed")
+        print("MCP: Not installed")
 
     # Print Python version
     print(f"Python: {sys.version.split()[0]}")
+
+    # Print versioning info
+    print("\nVersioning Strategy:")
+    print("- Application follows Semantic Versioning (MAJOR.MINOR.PATCH)")
+    print("- See VERSIONING.md for more information")
 
 
 if __name__ == "__main__":

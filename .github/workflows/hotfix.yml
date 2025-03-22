@@ -1,0 +1,112 @@
+name: Hotfix Release
+
+on:
+  push:
+    branches:
+      - 'hotfix-*'
+      - 'hotfix/*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Base version to hotfix'
+        required: true
+        default: '0.1.0'
+
+jobs:
+  critical-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run critical tests
+        run: |
+          # If critical test directory exists, run those tests first
+          if [ -d "tests/critical" ]; then
+            pytest tests/critical -v
+          else
+            # Otherwise run a subset of important tests
+            pytest tests/unit/test_models.py -v
+            pytest tests/unit/test_app.py -v
+          fi
+
+  build:
+    needs: critical-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Store build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+      - name: Verify version format
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "Verifying version format for tag: ${GITHUB_REF#refs/tags/}"
+          if [[ ! "${GITHUB_REF#refs/tags/}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "Invalid version format: ${GITHUB_REF#refs/tags/}"
+            exit 1
+          fi
+
+  # This job only runs when a tag is pushed (same as in release.yml)
+  deploy:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          draft: false
+          generate_release_notes: true
+          body: |
+            ## Hotfix Release
+
+            This is a hotfix release addressing critical issues.
+
+            Please update to this version as soon as possible.
+
+      - name: Publish to PyPI
+        if: ${{ !contains(github.ref, '-alpha') && !contains(github.ref, '-beta') }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Send notification
+        run: |
+          echo "Hotfix ${GITHUB_REF#refs/tags/} has been released"
+          # Add notification code here (email, Slack, etc.)

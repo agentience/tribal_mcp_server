@@ -1,0 +1,43 @@
+## Jira Issue Management
+
+Use jira-server to manage Jira issues for the project.
+
+When working with Jira issues, follow these guidelines:
+
+- **Issue Status**: Always set a Jira issue to "In Progress" before beginning work on it
+- **Subtasks**: Create subtasks when appropriate to break down larger issues into manageable pieces
+- **Issue References**: Include Jira issue IDs in commit messages and PR descriptions (e.g., "AT-123: Fix authentication bug")
+- **Issue Updates**: Regularly update issue status and add comments with progress updates
+- **Definition of Done**: Only mark issues as "Done" when all acceptance criteria are met, including tests and documentation
+
+# Tribal Branching Strategy
+
+## Branch Types and Uses
+- main: Production code only
+- develop: Integration branch for features
+- feature/*: New features from develop
+- bugfix/*: Non-critical fixes from develop
+- hotfix/*: Critical fixes from main
+- release/*: Release preparation from develop
+- docs/*: Documentation changes from develop
+
+## Version Bumping Rules
+- feature branches: No version changes
+- bugfix branches: No version changes
+- release branches: Minor or major version bump
+- hotfix branches: Patch version bump
+- docs branches: No version changes
+
+## Branch Naming Convention
+- feature/TMS-123-brief-description
+- bugfix/TMS-123-brief-description
+- hotfix/1.0.1-brief-description
+- release/1.1.0
+- docs/update-readme
+
+## When Helping with Code Changes
+1. Always check what branch we're on first
+2. Suggest the appropriate branch type for the changes
+3. Ensure version bumping follows the rules above
+4. Remind about running tests before pushing
+5. Help craft clear commit messages with issue IDs

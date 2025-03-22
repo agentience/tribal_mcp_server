@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tribal"
-version = "0.1.0"
+version = "0.1.1-alpha"
 description = "Tribal - Knowledge tracking tools for Claude and other LLMs"
 authors = [{ name = "Troy Molander", email = "troy@agentience.ai" }]
 readme = "README.md"

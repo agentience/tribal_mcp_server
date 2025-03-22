@@ -1,3 +1,15 @@
+## Jira Issue Management
+
+Use jira-server to manage Jira issues for the project.
+
+When working with Jira issues, follow these guidelines:
+
+- **Issue Status**: Always set a Jira issue to "In Progress" before beginning work on it
+- **Subtasks**: Create subtasks when appropriate to break down larger issues into manageable pieces
+- **Issue References**: Include Jira issue IDs in commit messages and PR descriptions (e.g., "AT-123: Fix authentication bug")
+- **Issue Updates**: Regularly update issue status and add comments with progress updates
+- **Definition of Done**: Only mark issues as "Done" when all acceptance criteria are met, including tests and documentation
+
 # Tribal Branching Strategy
 
 ## Branch Types and Uses

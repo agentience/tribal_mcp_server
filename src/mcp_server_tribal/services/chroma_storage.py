@@ -18,6 +18,7 @@ from uuid import UUID
 import chromadb
 
 from ..models.error_record import ErrorQuery, ErrorRecord
+from .migration import migration_manager
 from .storage_interface import StorageInterface
 from mcp_server_tribal import __version__
 
@@ -26,11 +27,6 @@ logger = logging.getLogger(__name__)
 
 # Current schema version - this should be updated when the schema changes
 SCHEMA_VERSION = "1.0.0"
-
-# Schema compatibility matrix - defines which schema versions are compatible with which app versions
-SCHEMA_COMPATIBILITY = {
-    "0.1.0": ["1.0.0"],  # App version 0.1.0 works with schema 1.0.0
-}
 
 
 class ChromaStorage(StorageInterface):
@@ -226,10 +222,13 @@ class ChromaStorage(StorageInterface):
                 )
 
                 # Check compatibility
-                if self._is_compatible_schema(current_version):
-                    if self._can_migrate(current_version, SCHEMA_VERSION):
-                        self._migrate_schema(current_version, SCHEMA_VERSION)
-                    else:
+                if migration_manager.is_compatible(current_version):
+                    # Try to migrate if possible
+                    migration_result = migration_manager.execute_migration(
+                        self, current_version, SCHEMA_VERSION
+                    )
+
+                    if not migration_result:
                         logger.warning(
                             f"Cannot automatically migrate from schema version {current_version} "
                             f"to {SCHEMA_VERSION}, but versions are compatible."
@@ -242,30 +241,6 @@ class ChromaStorage(StorageInterface):
         except Exception as e:
             # For first-time startup, this is normal
             logger.info(f"Schema validation startup: {e}")
-
-    def _is_compatible_schema(self, schema_version: str) -> bool:
-        """Check if the schema version is compatible with this application version."""
-        compatible_versions = SCHEMA_COMPATIBILITY.get(__version__, [])
-        return schema_version in compatible_versions
-
-    def _can_migrate(self, from_version: str, to_version: str) -> bool:
-        """Determine if migration is possible between versions."""
-        # Currently only support migration from 0.0.0 to 1.0.0
-        # This is the initial schema setup case
-        if from_version == "0.0.0" and to_version == "1.0.0":
-            return True
-        return False
-
-    def _migrate_schema(self, from_version: str, to_version: str) -> None:
-        """Migrate schema from one version to another."""
-        logger.info(f"Migrating schema from {from_version} to {to_version}")
-
-        if from_version == "0.0.0" and to_version == "1.0.0":
-            # Initial schema setup, just update the metadata
-            self.collection.modify(metadata={"schema_version": to_version})
-            logger.info(f"Schema version updated to {to_version}")
-        else:
-            raise ValueError(f"No migration path from {from_version} to {to_version}")
 
     async def search_similar(
         self, text_query: str, max_results: int = 5

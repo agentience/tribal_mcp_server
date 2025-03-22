@@ -15,7 +15,7 @@ When working with Jira issues, follow these guidelines:
 ## Current Development Workflow
 As we are currently the sole developer on the project, we're using a simplified workflow:
 - Create feature branches from develop as needed
-- Once a feature branch is complete and tested, merge it directly back to develop (no PR required)
+- Once a feature branch is complete and tested, merge it directly back to develop (no PR required).  Always pull base branches from origin before merging into them.
 - Run all tests before merging to ensure code quality
 
 This approach will be revised when more developers join the project.

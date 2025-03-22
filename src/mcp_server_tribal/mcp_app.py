@@ -17,16 +17,14 @@ import sys
 from typing import Dict, List, Optional
 from uuid import UUID
 
-import uvicorn
 from mcp.server.fastmcp import FastMCP
 
 from .models.error_record import ErrorQuery, ErrorRecord
 from .services.chroma_storage import ChromaStorage
-from .services.storage_interface import StorageInterface
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.ERROR,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
@@ -37,6 +35,7 @@ mcp = FastMCP(
     description="Knowledge tracking tools for Claude and other LLMs",
     version="0.1.0",
 )
+
 
 # Add system instructions for Claude
 @mcp.resource(uri="tribal://instructions/system", name="Tribal System Instructions")
@@ -53,6 +52,7 @@ async def get_system_instructions():
     These practices help build a collective knowledge base of common issues and proven solutions.
     """
 
+
 # Create storage instance
 def get_settings() -> Dict:
     """Get application settings from environment variables."""
@@ -67,13 +67,17 @@ def get_settings() -> Dict:
     return {
         "persist_directory": os.environ.get("PERSIST_DIRECTORY", "./chroma_db"),
         "api_key": os.environ.get("API_KEY", "dev-api-key"),
-        "secret_key": os.environ.get("SECRET_KEY", "insecure-dev-key-change-in-production"),
+        "secret_key": os.environ.get(
+            "SECRET_KEY", "insecure-dev-key-change-in-production"
+        ),
         "require_auth": os.environ.get("REQUIRE_AUTH", "false").lower() == "true",
         "default_port": default_port,
     }
 
+
 settings = get_settings()
 storage = ChromaStorage(persist_directory=settings["persist_directory"])
+
 
 # Create API key validator
 def validate_api_key(api_key: str) -> bool:
@@ -81,6 +85,7 @@ def validate_api_key(api_key: str) -> bool:
     if not settings["require_auth"]:
         return True
     return api_key == settings["api_key"]
+
 
 # Define MCP tools
 @mcp.tool()
@@ -124,14 +129,14 @@ async def track_error(
             "error_message": error_message,
             "framework": framework,
             "code_snippet": code_snippet,
-            "task_description": task_description
+            "task_description": task_description,
         },
         solution={
             "description": solution_description,
             "code_fix": solution_code_fix,
             "explanation": solution_explanation,
-            "references": solution_references
-        }
+            "references": solution_references,
+        },
     )
 
     error_record = await storage.add_error(error_data)
@@ -186,7 +191,7 @@ async def search_errors(
         error_message=error_message,
         code_snippet=code_snippet,
         task_description=task_description,
-        max_results=max_results
+        max_results=max_results,
     )
 
     records = await storage.search_errors(query)
@@ -254,6 +259,7 @@ async def get_api_status() -> Dict:
 def is_port_available(host, port):
     """Check if a port is available."""
     import socket
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.bind((host, port))
@@ -267,7 +273,9 @@ def find_available_port(host, start_port, max_attempts=100):
     for port in range(start_port, start_port + max_attempts):
         if is_port_available(host, port):
             return port
-    raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
+    raise RuntimeError(
+        f"Could not find an available port after {max_attempts} attempts"
+    )
 
 
 def parse_args(args=None):
@@ -280,7 +288,9 @@ def parse_args(args=None):
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
     # Server command (default)
-    server_parser = subparsers.add_parser("server", help="Run the knowledge tracking server")
+    server_parser = subparsers.add_parser(
+        "server", help="Run the knowledge tracking server"
+    )
     server_parser.add_argument(
         "--host",
         type=str,
@@ -291,7 +301,7 @@ def parse_args(args=None):
         "--port",
         type=int,
         default=settings["default_port"],
-        help=f"Port to bind the server to (default: {settings['default_port']})"
+        help=f"Port to bind the server to (default: {settings['default_port']})",
     )
     server_parser.add_argument(
         "--reload",
@@ -305,10 +315,10 @@ def parse_args(args=None):
     )
 
     # Version command
-    version_parser = subparsers.add_parser("version", help="Show version information")
+    subparsers.add_parser("version", help="Show version information")
 
     # Help command
-    help_parser = subparsers.add_parser("help", help="Show help information")
+    subparsers.add_parser("help", help="Show help information")
 
     # Parse args
     parsed_args = parser.parse_args(args)
@@ -317,13 +327,13 @@ def parse_args(args=None):
     if not parsed_args.command:
         parsed_args.command = "server"
         # Add default server arguments if they're needed
-        if not hasattr(parsed_args, 'host'):
+        if not hasattr(parsed_args, "host"):
             parsed_args.host = "0.0.0.0"
-        if not hasattr(parsed_args, 'port'):
+        if not hasattr(parsed_args, "port"):
             parsed_args.port = settings["default_port"]
-        if not hasattr(parsed_args, 'reload'):
+        if not hasattr(parsed_args, "reload"):
             parsed_args.reload = False
-        if not hasattr(parsed_args, 'auto_port'):
+        if not hasattr(parsed_args, "auto_port"):
             parsed_args.auto_port = False
 
     return parsed_args
@@ -335,7 +345,7 @@ def main(sys_args=None):
 
     # Handle different commands
     if args.command == "version":
-        print(f"Tribal: 0.1.0")
+        print("Tribal: 0.1.0")
         print(f"Python: {sys.version.split()[0]}")
         return 0
 
@@ -361,13 +371,17 @@ def main(sys_args=None):
         try:
             # In MCP 1.3.0, we use mcp.run() with 'sse' transport for HTTP connections
             # The transport parameter determines the protocol used (stdio or sse)
-            mcp.run(transport='stdio')
+            mcp.run(transport="stdio")
             return 0
         except OSError as e:
             if "Address already in use" in str(e) and not args.auto_port:
-                logger.error(f"Port {port} is already in use. Use --auto-port to automatically select an available port.")
+                logger.error(
+                    f"Port {port} is already in use. Use --auto-port to automatically select an available port."
+                )
                 next_port = find_available_port(args.host, port + 1)
-                logger.info(f"You can try using port {next_port} which appears to be available.")
+                logger.info(
+                    f"You can try using port {next_port} which appears to be available."
+                )
             raise
 
     # Should never reach here if the command is valid

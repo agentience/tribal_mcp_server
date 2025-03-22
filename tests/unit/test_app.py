@@ -3,7 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from learned_knowledge_mcp.app import app
+from mcp_server_tribal.app import app
 
 
 @pytest.fixture
@@ -16,7 +16,7 @@ def test_read_main(client):
     """Test the root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json()["name"] == "Learned Knowledge MCP"
+    assert response.json()["name"] == "Tribal"
 
 
 def test_health_check(client):

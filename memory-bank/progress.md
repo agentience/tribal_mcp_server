@@ -1,7 +1,7 @@
 # Project Progress: Tribal
 
 ## Current Status Overview
-As of March 22, 2025, the Tribal project is in active development with version 0.1.0. The core functionality is implemented and stable, while additional features and improvements are being added systematically. The current focus is on implementing a comprehensive versioning strategy to support sustainable long-term development.
+As of March 22, 2025, the Tribal project is in active development with version 0.1.1-alpha. The core functionality is implemented and stable, while additional features and improvements are being added systematically. The current focus is on implementing a comprehensive versioning strategy to support sustainable long-term development.
 
 ## What Works
 
@@ -75,6 +75,7 @@ As of March 22, 2025, the Tribal project is in active development with version 0
 ## Recent Milestones
 
 ### Completed
+- ✅ **2025-03-22**: Tested version bumping from 0.1.0 to 0.1.1-alpha
 - ✅ **2025-03-22**: Version consistency checks added to CI
 - ✅ **2025-03-22**: Schema migration framework completed
 - ✅ **2025-03-20**: Initial versioning strategy implementation

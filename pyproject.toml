@@ -6,9 +6,7 @@ build-backend = "hatchling.build"
 name = "tribal"
 version = "0.1.0"
 description = "Tribal - Knowledge tracking tools for Claude and other LLMs"
-authors = [
-    {name = "Agentience", email = "info@agentience.com"}
-]
+authors = [{ name = "Troy Molander", email = "troy@agentience.ai" }]
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [
@@ -24,7 +22,7 @@ dependencies = [
     "python-jose[cryptography]>=3.3.0",
     "python-multipart>=0.0.9",
     "numpy<2.0.0",
-    "mcp[cli]>=1.3.0"
+    "mcp[cli]>=1.3.0",
 ]
 
 [project.optional-dependencies]
@@ -34,13 +32,13 @@ dev = [
     "ruff>=0.2.0",
     "black>=24.2.0",
     "httpx>=0.27.0",
-    "build>=1.2.2.post1"
+    "build>=1.2.2.post1",
 ]
 
 [project.scripts]
-tribal = "mcp_server_tribal.mcp_app:main"  # Main command 
-mcp-api = "mcp_server_tribal.app:main"  # Legacy support
-mcp-server = "mcp_server_tribal.mcp_app:main"  # Legacy support
+tribal = "mcp_server_tribal.mcp_app:main"                      # Main command
+mcp-api = "mcp_server_tribal.app:main"                         # Legacy support
+mcp-server = "mcp_server_tribal.mcp_app:main"                  # Legacy support
 mcp-client = "examples.api_client:main"
 docker-start = "mcp_server_tribal._scripts:docker_start"
 docker-stop = "mcp_server_tribal._scripts:docker_stop"
@@ -79,6 +77,4 @@ python_classes = "Test*"
 python_functions = "test_*"
 
 [dependency-groups]
-dev = [
-    "tribal",
-]
+dev = ["tribal"]

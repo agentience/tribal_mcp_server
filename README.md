@@ -270,6 +270,45 @@ mypy .
 black .
 ```
 
+### GitHub Workflow
+
+This project uses GitHub Actions for continuous integration and deployment. The workflow automatically runs tests, linting, and type checking on push to main and pull requests.
+
+#### Workflow Steps
+
+1. **Test**: Runs linting, type checking, and unit tests
+   - Uses Python 3.12
+   - Installs dependencies with uv
+   - Runs ruff, black, mypy, and pytest
+
+2. **Build and Publish**: Builds and publishes the package to PyPI
+   - Triggered only on push to main branch
+   - Uses Python's build system
+   - Publishes to PyPI using twine
+
+#### Testing Locally
+
+You can test the GitHub workflow locally using the provided script:
+
+```bash
+# Make the script executable
+chmod +x scripts/test-workflow.sh
+
+# Run the workflow locally
+./scripts/test-workflow.sh
+```
+
+This script simulates the GitHub workflow steps on your local machine:
+- Checks Python version (3.12 recommended)
+- Installs dependencies using uv
+- Runs linting with ruff
+- Checks formatting with black
+- Runs type checking with mypy
+- Runs tests with pytest
+- Builds the package
+
+Note: The script skips the publishing step for local testing.
+
 ### Project Structure
 
 ```

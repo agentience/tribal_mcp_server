@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 
 class ErrorContext(BaseModel):
     """Contextual information about an error."""
-    
+
     language: str
     framework: Optional[str] = None
     error_message: str
@@ -29,7 +29,7 @@ class ErrorContext(BaseModel):
 
 class ErrorSolution(BaseModel):
     """Solution for an error."""
-    
+
     description: str
     code_fix: Optional[str] = None
     explanation: str
@@ -38,7 +38,7 @@ class ErrorSolution(BaseModel):
 
 class ErrorRecord(BaseModel):
     """Record of an error with context and solution."""
-    
+
     id: UUID = Field(default_factory=uuid4)
     error_type: str
     context: ErrorContext
@@ -46,7 +46,7 @@ class ErrorRecord(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     metadata: dict = Field(default_factory=dict)
-    
+
     model_config = {
         "json_schema_extra": {
             "example": {
@@ -56,14 +56,14 @@ class ErrorRecord(BaseModel):
                     "framework": "fastapi",
                     "error_message": "No module named 'fastapi'",
                     "code_snippet": "from fastapi import FastAPI\napp = FastAPI()",
-                    "task_description": "Setting up a FastAPI server"
+                    "task_description": "Setting up a FastAPI server",
                 },
                 "solution": {
                     "description": "Install FastAPI package",
                     "code_fix": "pip install fastapi",
                     "explanation": "The fastapi package needs to be installed before importing it",
-                    "references": ["https://fastapi.tiangolo.com/tutorial/"]
-                }
+                    "references": ["https://fastapi.tiangolo.com/tutorial/"],
+                },
             }
         }
     }
@@ -71,7 +71,7 @@ class ErrorRecord(BaseModel):
 
 class ErrorQuery(BaseModel):
     """Query parameters for searching error records."""
-    
+
     error_type: Optional[str] = None
     language: Optional[str] = None
     framework: Optional[str] = None

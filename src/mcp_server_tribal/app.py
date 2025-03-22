@@ -12,10 +12,10 @@
 import argparse
 import logging
 import os
-from typing import Dict, Optional
+from typing import Dict
 
 import uvicorn
-from fastapi import Depends, FastAPI, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api import api_router
@@ -32,18 +32,20 @@ logger = logging.getLogger(__name__)
 
 def get_settings() -> Dict:
     """Get application settings from environment variables."""
-    
+
     # Parse port from environment or use default
     try:
         default_port = int(os.environ.get("PORT", 8000))
     except ValueError:
         default_port = 8000
         logger.warning(f"Invalid PORT value, using default: {default_port}")
-    
+
     return {
         "persist_directory": os.environ.get("PERSIST_DIRECTORY", "./chroma_db"),
         "api_key": os.environ.get("API_KEY", "dev-api-key"),
-        "secret_key": os.environ.get("SECRET_KEY", "insecure-dev-key-change-in-production"),
+        "secret_key": os.environ.get(
+            "SECRET_KEY", "insecure-dev-key-change-in-production"
+        ),
         "require_auth": os.environ.get("REQUIRE_AUTH", "false").lower() == "true",
         "default_port": default_port,
     }
@@ -52,10 +54,10 @@ def get_settings() -> Dict:
 def get_storage() -> StorageInterface:
     """
     Get the storage service.
-    
+
     This function serves as a FastAPI dependency that provides
     the storage service to API routes.
-    
+
     Returns:
         An instance of the storage service
     """
@@ -113,7 +115,7 @@ async def log_requests(request: Request, call_next):
 def parse_args():
     """Parse command line arguments."""
     settings = get_settings()
-    
+
     parser = argparse.ArgumentParser(description="Run the MCP server")
     parser.add_argument(
         "--host",
@@ -122,10 +124,10 @@ def parse_args():
         help="Host to bind the server to",
     )
     parser.add_argument(
-        "--port", 
-        type=int, 
-        default=settings["default_port"], 
-        help=f"Port to bind the server to (default: {settings['default_port']})"
+        "--port",
+        type=int,
+        default=settings["default_port"],
+        help=f"Port to bind the server to (default: {settings['default_port']})",
     )
     parser.add_argument(
         "--reload",
@@ -143,6 +145,7 @@ def parse_args():
 def is_port_available(host, port):
     """Check if a port is available."""
     import socket
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.bind((host, port))
@@ -156,23 +159,25 @@ def find_available_port(host, start_port, max_attempts=100):
     for port in range(start_port, start_port + max_attempts):
         if is_port_available(host, port):
             return port
-    raise RuntimeError(f"Could not find an available port after {max_attempts} attempts")
+    raise RuntimeError(
+        f"Could not find an available port after {max_attempts} attempts"
+    )
 
 
 def main():
     """Run the application."""
     args = parse_args()
     port = args.port
-    
+
     # Auto-select port if requested and the specified port is not available
     if args.auto_port and not is_port_available(args.host, port):
         original_port = port
         port = find_available_port(args.host, original_port)
         logger.info(f"Port {original_port} is in use, using port {port} instead")
-    
+
     logger.info(f"Starting server on {args.host}:{port}")
     logger.info(f"Documentation available at http://{args.host}:{port}/docs")
-    
+
     try:
         uvicorn.run(
             "mcp_server_tribal.app:app",
@@ -182,9 +187,13 @@ def main():
         )
     except OSError as e:
         if "Address already in use" in str(e) and not args.auto_port:
-            logger.error(f"Port {port} is already in use. Use --auto-port to automatically select an available port.")
+            logger.error(
+                f"Port {port} is already in use. Use --auto-port to automatically select an available port."
+            )
             next_port = find_available_port(args.host, port + 1)
-            logger.info(f"You can try using port {next_port} which appears to be available.")
+            logger.info(
+                f"You can try using port {next_port} which appears to be available."
+            )
         raise
 
 

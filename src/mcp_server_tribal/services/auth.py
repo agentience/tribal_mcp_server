@@ -26,14 +26,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 class Token(BaseModel):
     """Token response model."""
-    
+
     access_token: str
     token_type: str
 
 
 class TokenData(BaseModel):
     """Token data model."""
-    
+
     username: Optional[str] = None
 
 
@@ -47,35 +47,37 @@ else:
     # When auth is disabled, use a scheme that doesn't enforce auth
     from fastapi.security import OAuth2
     from fastapi.openapi.models import OAuthFlows
-    
+
     class OptionalOAuth2PasswordBearer(OAuth2):
         """OAuth2 password bearer scheme that makes token optional."""
-        
+
         def __init__(self, tokenUrl: str):
             """Initialize the scheme."""
             flows = OAuthFlows(password={"tokenUrl": tokenUrl, "scopes": {}})
             super().__init__(flows=flows, scheme_name="OAuth2PasswordBearer")
-        
+
         async def __call__(self, request: Request) -> Optional[str]:
             """Return None for the token to make it optional."""
             return None
-    
+
     oauth2_scheme = OptionalOAuth2PasswordBearer(tokenUrl="token")
 
 
 def create_access_token(data: Dict, expires_delta: Optional[timedelta] = None) -> str:
     """
     Create a JWT access token.
-    
+
     Args:
         data: Data to encode in the token
         expires_delta: Token expiration time
-        
+
     Returns:
         JWT token string
     """
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.utcnow() + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -84,13 +86,13 @@ def create_access_token(data: Dict, expires_delta: Optional[timedelta] = None) -
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
     """
     Validate the access token and extract the current user.
-    
+
     Args:
         token: JWT token
-        
+
     Returns:
         Username from the token
-        
+
     Raises:
         HTTPException: If the token is invalid
     """
@@ -99,7 +101,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -108,7 +110,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    
+
     return token_data.username
 
 
@@ -122,10 +124,10 @@ API_KEYS = {
 async def verify_api_key(api_key: str) -> Optional[str]:
     """
     Verify an API key and return the associated username.
-    
+
     Args:
         api_key: The API key to verify
-        
+
     Returns:
         The username associated with the API key, or None if invalid
     """
@@ -134,33 +136,33 @@ async def verify_api_key(api_key: str) -> Optional[str]:
 
 class ApiKeyAuth:
     """API key authentication handler."""
-    
+
     def __init__(self, require_auth: bool = True):
         """
         Initialize the API key authentication handler.
-        
+
         Args:
             require_auth: Whether to require authentication
         """
         self.require_auth = require_auth
-    
+
     async def __call__(self, api_key: str = Depends(oauth2_scheme)) -> str:
         """
         Validate the API key and return the user.
-        
+
         Args:
             api_key: The API key to validate
-            
+
         Returns:
             The username associated with the API key
-            
+
         Raises:
             HTTPException: If the API key is invalid and authentication is required
         """
         # Skip authentication if not required
         if not self.require_auth:
             return "anonymous"
-            
+
         username = await verify_api_key(api_key)
         if not username:
             raise HTTPException(

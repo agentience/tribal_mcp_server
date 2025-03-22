@@ -137,7 +137,7 @@ We integrated the Learned Knowledge MCP (Model Context Protocol) application wit
 ## What's next:
 
 1. Test the integration with Claude for Desktop using the running Docker container
-2. Test the integration with Claude Code CLI 
+2. Test the integration with Claude Code CLI
 3. Consider further enhancements to the error database functionality
 4. Potentially modify the Docker debug mode to improve functionality while maintaining reliability
 # Conversation Fri Mar  7 17:20:37 PST 2025

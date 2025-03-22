@@ -1,3 +1,12 @@
+# filename: {filename}
+# description:
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 # filename: tests/unit/test_migration.py
 #
 # Copyright (c) 2025 Agentience.ai
@@ -186,7 +195,9 @@ class TestMigrationIntegration:
         result = manager.execute_migration(storage, "0.0.0", "1.0.0")
 
         assert result is True
-        storage.collection.modify.assert_called_once_with(metadata={"schema_version": "1.0.0"})
+        storage.collection.modify.assert_called_once_with(
+            metadata={"schema_version": "1.0.0"}
+        )
 
         # Check compatibility
         assert manager.is_compatible("1.0.0") is True

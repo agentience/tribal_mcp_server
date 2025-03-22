@@ -1,3 +1,12 @@
+# filename: {filename}
+# description:
+#
+# Copyright (c) 2025 Agentience.ai
+# Author: Troy Molander
+# License: MIT License - See LICENSE file for details
+#
+# Version: 0.1.0
+
 # filename: mcp_server_tribal/services/chroma_storage.py
 #
 # Copyright (c) 2025 Agentience.ai
@@ -44,10 +53,7 @@ class ChromaStorage(StorageInterface):
         self.client = chromadb.PersistentClient(path=persist_directory)
         self.collection = self.client.get_or_create_collection(
             name="error_records",
-            metadata={
-                "hnsw:space": "cosine",
-                "schema_version": SCHEMA_VERSION
-            }
+            metadata={"hnsw:space": "cosine", "schema_version": SCHEMA_VERSION},
         )
 
         # Validate schema version on startup

@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/agentience-tribal-mcp-server-badge.png)](https://mseep.ai/app/agentience-tribal-mcp-server)
+
 # Tribal - Knowledge Service
 
 Tribal is an MCP (Model Context Protocol) server implementation for error knowledge tracking and retrieval. It provides both REST API and native MCP interfaces for integration with tools like Claude Code and Cline.
